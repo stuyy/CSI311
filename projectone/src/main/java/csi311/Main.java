@@ -1,96 +1,65 @@
 package csi311;
 
-import java.io.*; // Import IO Library 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 
 public class Main {
-	
-	public static void main(String [] args)
+	public static void main(String[] args) throws Exception
 	{
-		// First we need to take in command line arguments, and check to see if the argument passed in is a file.
-		try {
-
-			if(args.length == 0)
-				throw new Exception("No arguments provided.");
+		PackageParser parser = new PackageParser();
+		String fileName = "C:/Users/Anson/Desktop/test.txt";
+		File file = new File(fileName);
+		// Check if file exists.
+		if(file.exists() || !file.getName().endsWith(".txt"))
+		{
+			FileReader currFile = new FileReader(file);
+			BufferedReader reader = new BufferedReader(currFile);
 			
-			if(args.length != 1)
-				throw new Exception("Too many arguments. Please only specify a text input file.");
-			
-			if(args.length == 1)
+			String currentLine;
+			while((currentLine = reader.readLine()) != null)
 			{
-				// Check if the file exists.
-				File file = new File(args[0]);
-				if(file.exists())
+				if(currentLine.length() == 0)
+					continue;
+				
+				if(currentLine.trim().endsWith(","))
 				{
-					FileReader fileReader = new FileReader(file);
-					BufferedReader bufferedReader = new BufferedReader(fileReader);
-					String line;
-					while((line = bufferedReader.readLine()) != null)
-					{
-						if(line.length() == 0)
-							continue;
-						else {
-							int firstCommaPosition = line.indexOf(",");
-							String packageID = line.substring(0, firstCommaPosition);
-							//System.out.println("The first comma appears at " + firstCommaPosition);
-							//System.out.println("Package ID: " + packageID);
-							// First let's parse the Package ID.
-							boolean isValidPackageID = parsePackageID(packageID.trim());
-							System.out.println(isValidPackageID ? "Yes" : "No");
+					//System.out.println("Invalid Line, comma at the wrong position");
+					parser.getInvalidPackages().add(currentLine);
+					continue;
+				}
+				
+				boolean validCommaCount = parser.getCommaCount(currentLine);
+				if(validCommaCount)
+				{
+					// Parse the ID. Get the Substring of the currentLine to retrieve the package ID,
+					// and trim any leading or trailing whitespace.
+					try {
+						String packageID = currentLine.substring(0, currentLine.indexOf(',')).trim();
+						boolean isValidPackageID = parser.lineParser(packageID);
+						if(isValidPackageID)
+						{
+							// Now check the next substring to see if it has a valid street/avenue name.
+							
+							// Then check if the weight is good.
 						}
 					}
+					catch(Exception ex)
+					{
+						parser.getInvalidPackages().add(currentLine);
+					}
 				}
-				else 
+				else
 				{
-					throw new FileNotFoundException("File Not Found");
+					System.out.println("This line does not have valid commas");
+					parser.getInvalidPackages().add(currentLine);
 				}
 			}
+			System.out.println("Invalid Packages:");
+			for(String c : parser.getInvalidPackages())
+				System.out.println(c);
 		}
-		catch(Exception ex)
-		{
-			System.out.println(ex);
-		}
-	}
-	
-	public static Boolean parsePackageID(String packageID)
-	{
-		// If Package ID's length is not 12, return false.
-		if(packageID.length() != 12)
-			return false;
-		else {
-			if(packageID.charAt(3) != '-' || packageID.charAt(7) != '-')
-			{
-				System.out.println("Invalid package id");
-				return false;
-			}
-			else {
-				try {
-					int firstNumber = Integer.parseInt(packageID.substring(0, 3));
-					int lastNumber = Integer.parseInt(packageID.substring(8, 12));
-					String middle = packageID.substring(4, 7);
-					boolean hasADigit = hasDigit(middle);
-					if(hasADigit)
-						return false;
-					else
-						return true;
-				}
-				catch(Exception ex)
-				{
-					return false;
-				}
-			}
-		}
-	}
-	
-	public static Boolean hasDigit(String str)
-	{
-		int i = 0;
-		while(i < str.length()){
-			if(Character.isDigit(str.charAt(i)))
-				return true;
-			i++;
-		}
-		
-		return false;
-		
+		else
+			throw new Exception("Invalid File or File does not exist.");
 	}
 }
