@@ -6,6 +6,7 @@ import java.util.ArrayList;
 public class PackageParser {
 	
 	private ArrayList<String> invalidPackages;
+	private ArrayList<String> validPackages;
 	
 	public PackageParser()
 	{
@@ -28,6 +29,21 @@ public class PackageParser {
 		}
 		
 		return commaCount == 2;
+	}
+	
+	public boolean validateAddress(String address)
+	{
+		if(address.toLowerCase().endsWith("st") || address.toLowerCase().endsWith("st.") || address.toLowerCase().endsWith("street"))
+			return true;
+		else if(address.toLowerCase().endsWith("ave") || address.toLowerCase().endsWith("ave.") || address.toLowerCase().endsWith("avenue"))
+			return true;
+		else if(address.toLowerCase().endsWith("east") || address.toLowerCase().endsWith("e") || address.toLowerCase().endsWith("e."))
+			return true;
+		else if(address.toLowerCase().endsWith("west") || address.toLowerCase().endsWith("w.") || address.toLowerCase().endsWith("w"))
+			return true;
+		else if(address.toLowerCase().endsWith("broadway") || address.toLowerCase().endsWith("bway") || address.toLowerCase().endsWith("b'way"))
+			return true;
+		return false;
 	}
 	public boolean lineParser(String line) throws Exception
 	{
