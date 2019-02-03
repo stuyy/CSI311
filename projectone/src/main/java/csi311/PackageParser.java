@@ -2,17 +2,25 @@ package csi311;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class PackageParser {
 	
 	private ArrayList<String> invalidPackages;
-	private ArrayList<String> validPackages;
+	private ArrayList<String> packagesExceedingLimit;
+	private HashMap<String, Integer> validPackages;
 	
 	public PackageParser()
 	{
 		this.invalidPackages = new ArrayList<>();
+		this.packagesExceedingLimit = new ArrayList<>();
+		this.validPackages = new HashMap<>();
 	}
 	
+	public HashMap<String, Integer> getValidPackages()
+	{
+		return this.validPackages;
+	}
 	public ArrayList<String> getInvalidPackages()
 	{
 		return this.invalidPackages;
@@ -34,14 +42,24 @@ public class PackageParser {
 	public boolean validateAddress(String address)
 	{
 		if(address.toLowerCase().endsWith("st") || address.toLowerCase().endsWith("st.") || address.toLowerCase().endsWith("street"))
+		{
 			return true;
+		}
 		else if(address.toLowerCase().endsWith("ave") || address.toLowerCase().endsWith("ave.") || address.toLowerCase().endsWith("avenue"))
 			return true;
-		else if(address.toLowerCase().endsWith("east") || address.toLowerCase().endsWith("e") || address.toLowerCase().endsWith("e."))
-			return true;
-		else if(address.toLowerCase().endsWith("west") || address.toLowerCase().endsWith("w.") || address.toLowerCase().endsWith("w"))
-			return true;
 		else if(address.toLowerCase().endsWith("broadway") || address.toLowerCase().endsWith("bway") || address.toLowerCase().endsWith("b'way"))
+			return true;
+		
+		return false;
+	}
+	
+	public boolean validateTeam(String address)
+	{
+		if(address.contains("Ave") || address.contains("Avenue"))
+		{
+			return true;
+		}
+		else if(address.contains("Broadway"))
 			return true;
 		return false;
 	}

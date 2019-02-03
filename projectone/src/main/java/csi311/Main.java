@@ -42,7 +42,25 @@ public class Main {
 							// Now check the next substring to see if it has a valid street/avenue name.
 							int firstCommaPosition = currentLine.indexOf(',');
 							String address = currentLine.substring(firstCommaPosition+1).trim();
+
 							String weight = address.substring(address.indexOf(',')+1).trim();
+							address = address.substring(0, address.indexOf(','));
+							boolean isValidAddress = parser.validateAddress(address);
+							
+							if(isValidAddress)
+							{
+								// Check for the team.
+								System.out.println(address);
+								boolean validTeam = parser.validateTeam(address);
+								if(validTeam)
+								{
+									//if(weight > 50)
+										
+								}
+							}
+							else {
+								throw new Exception("Invalid Address");
+							}
 							// Then check if the weight is good.
 						}
 					}
