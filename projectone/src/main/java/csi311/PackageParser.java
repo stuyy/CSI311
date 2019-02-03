@@ -7,14 +7,17 @@ import java.util.HashMap;
 public class PackageParser {
 	
 	private ArrayList<String> invalidPackages;
-	private ArrayList<String> packagesExceedingLimit;
 	private HashMap<String, Integer> validPackages;
 	
 	public PackageParser()
 	{
-		this.invalidPackages = new ArrayList<>();
-		this.packagesExceedingLimit = new ArrayList<>();
+		this.invalidPackages = new ArrayList<>();		
 		this.validPackages = new HashMap<>();
+		this.validPackages.put("West", 0);
+		this.validPackages.put("East", 0);
+		this.validPackages.put("Ave", 0);
+		this.validPackages.put("Broadway", 0);
+		this.validPackages.put(">50lbs", 0);
 	}
 	
 	public HashMap<String, Integer> getValidPackages()
@@ -53,15 +56,20 @@ public class PackageParser {
 		return false;
 	}
 	
-	public boolean validateTeam(String address)
+	public String validateTeam(String address)
 	{
-		if(address.contains("Ave") || address.contains("Avenue"))
+		if(address.contains("Ave") || address.contains("Avenue") || address.contains("Ave."))
 		{
-			return true;
+			return "Ave";
 		}
-		else if(address.contains("Broadway"))
-			return true;
-		return false;
+		else if(address.contains("Broadway") || address.contains("B'way") || address.contains("Bway"))
+			return "Broadway";
+		else if(address.contains("East") || address.contains(" E ") || address.contains(" E. "))
+			return "East";
+		else if(address.contains("West") || address.contains(" W ") || address.contains(" W. "))
+			return "West";
+		
+		else return null;
 	}
 	public boolean lineParser(String line) throws Exception
 	{

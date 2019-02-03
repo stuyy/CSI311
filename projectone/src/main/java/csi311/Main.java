@@ -3,12 +3,14 @@ package csi311;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.Iterator;
+import java.util.Map;
 
 public class Main {
 	public static void main(String[] args) throws Exception
 	{
 		PackageParser parser = new PackageParser();
-		String fileName = "C:/Users/Anson/Desktop/test.txt";
+		String fileName = "/Users/anson/Desktop/test.txt";
 		File file = new File(fileName);
 		if(file.exists() || !file.getName().endsWith(".txt")) // Check if file exists.
 		{
@@ -50,12 +52,31 @@ public class Main {
 							if(isValidAddress)
 							{
 								// Check for the team.
-								System.out.println(address);
-								boolean validTeam = parser.validateTeam(address);
-								if(validTeam)
+								//System.out.println(address);
+								String team = parser.validateTeam(address);
+								if(team != null)
 								{
-									//if(weight > 50)
-										
+									if(Double.parseDouble(weight) > 50)
+									{
+										//System.out.print("Package limit exceeded.");
+										if(parser.getValidPackages().containsKey(">50lbs"))
+										{
+											int currentCount = parser.getValidPackages().get(">50lbs");
+											parser.getValidPackages().put(">50lbs", ++currentCount);
+										}
+										else
+											parser.getValidPackages().put(">50lbs", 1);
+									}
+									else { // Package is less than 50, and the team is valid.
+										//System.out.println("Team: " + team + "\n" + address);
+										if(parser.getValidPackages().containsKey(team))
+										{
+											int currentCount = parser.getValidPackages().get(team);
+											parser.getValidPackages().put(team, ++currentCount);
+										}
+										else
+											parser.getValidPackages().put(team, 1);
+									}
 								}
 							}
 							else {
@@ -76,6 +97,13 @@ public class Main {
 			System.out.println("Invalid Packages:");
 			for(String c : parser.getInvalidPackages())
 				System.out.println(c);
+			
+			Iterator iter = parser.getValidPackages().entrySet().iterator();
+			while(iter.hasNext())
+			{
+				Map.Entry value = (Map.Entry)iter.next(); 
+				System.out.println(value.getKey() + ": " + value.getValue());
+			}
 		}
 		else
 			throw new Exception("Invalid File or File does not exist.");
