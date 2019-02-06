@@ -71,7 +71,7 @@ public class PackageParser {
 		{
 			return "Ave";
 		}
-		else if(address.contains("Broadway") || address.contains("B'way") || address.contains("Bway"))
+		else if(address.toLowerCase().contains("broadway") || address.toLowerCase().contains("b'way") || address.toLowerCase().contains("bway"))
 			return "Broadway";
 		else if(address.contains("East") || address.contains(" E ") || address.contains(" E. "))
 			return "East";
