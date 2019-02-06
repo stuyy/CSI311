@@ -7,19 +7,28 @@ import java.util.HashMap;
 public class PackageParser {
 	
 	private ArrayList<String> invalidPackages;
+	private int exceededWeightLimit;
 	private HashMap<String, Integer> validPackages;
 	
 	public PackageParser()
 	{
 		this.invalidPackages = new ArrayList<>();		
 		this.validPackages = new HashMap<>();
+		this.exceededWeightLimit = 0;
 		this.validPackages.put("West", 0);
 		this.validPackages.put("East", 0);
 		this.validPackages.put("Ave", 0);
 		this.validPackages.put("Broadway", 0);
-		this.validPackages.put(">50lbs", 0);
 	}
 	
+	public int getExceededPackages()
+	{
+		return this.exceededWeightLimit;
+	}
+	public void incrementExceededPackages()
+	{
+		this.exceededWeightLimit++;
+	}
 	public HashMap<String, Integer> getValidPackages()
 	{
 		return this.validPackages;

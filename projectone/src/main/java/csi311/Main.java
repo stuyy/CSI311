@@ -10,8 +10,8 @@ public class Main {
 	public static void main(String[] args) throws Exception
 	{
 		PackageParser parser = new PackageParser();
-		String fileName = "/Users/anson/Desktop/test.txt";
-		File file = new File(fileName);
+		//String fileName = "/Users/anson/Desktop/test.txt";
+		File file = new File(args[0]);
 		if(file.exists() || !file.getName().endsWith(".txt")) // Check if file exists.
 		{
 			FileReader currFile = new FileReader(file);
@@ -26,18 +26,19 @@ public class Main {
 				if(currentLine.trim().endsWith(",")) // If the line ends with a comma, continue.
 				{
 					//System.out.println("Invalid Line, comma at the wrong position");
-					parser.getInvalidPackages().add(currentLine);
+					parser.getInvalidPackages().add(currentLine.substring(0, currentLine.indexOf(',')));
 					continue;
 				}
 				
 				boolean validCommaCount = parser.getCommaCount(currentLine);
+				String packageID = currentLine.substring(0, currentLine.indexOf(',')).trim();
 				
 				if(validCommaCount) // If there are only 2 commas, then we go into this case.
 				{
 					// Parse the ID. Get the Substring of the currentLine to retrieve the package ID,
 					// and trim any leading or trailing whitespace.
 					try {
-						String packageID = currentLine.substring(0, currentLine.indexOf(',')).trim();
+						
 						boolean isValidPackageID = parser.lineParser(packageID);
 						if(isValidPackageID) // if the package id is valid
 						{
@@ -59,13 +60,7 @@ public class Main {
 									if(Double.parseDouble(weight) > 50)
 									{
 										//System.out.print("Package limit exceeded.");
-										if(parser.getValidPackages().containsKey(">50lbs"))
-										{
-											int currentCount = parser.getValidPackages().get(">50lbs");
-											parser.getValidPackages().put(">50lbs", ++currentCount);
-										}
-										else
-											parser.getValidPackages().put(">50lbs", 1);
+										parser.incrementExceededPackages();
 									}
 									else { // Package is less than 50, and the team is valid.
 										//System.out.println("Team: " + team + "\n" + address);
@@ -87,11 +82,11 @@ public class Main {
 					}
 					catch(Exception ex)
 					{
-						parser.getInvalidPackages().add(currentLine);
+						parser.getInvalidPackages().add(packageID);
 					}
 				}
 				else
-					parser.getInvalidPackages().add(currentLine);
+					parser.getInvalidPackages().add(packageID);
 			}
 			
 			System.out.println("Invalid Packages:");
@@ -104,6 +99,7 @@ public class Main {
 				Map.Entry value = (Map.Entry)iter.next(); 
 				System.out.println(value.getKey() + ": " + value.getValue());
 			}
+			System.out.println(">50lbs : " + parser.getExceededPackages());
 		}
 		else
 			throw new Exception("Invalid File or File does not exist.");
