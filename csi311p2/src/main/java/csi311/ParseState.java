@@ -1,14 +1,16 @@
 package csi311;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import csi311.MachineSpec.StateTransitions; 
 
 public class ParseState {
-
+	
 	public ParseState() {
 		
 	}
@@ -16,6 +18,7 @@ public class ParseState {
 	
     public void run(String machine, String orders) throws Exception {
     	System.out.println("Parse State"); 
+    	
     	if (machine != null) {
     		String json = processFile(machine); // Call processFile to Stringify the JSON.
     		System.out.println("Raw json = " + json);  // Print out the JSON
@@ -23,9 +26,24 @@ public class ParseState {
     		dumpMachine(machineSpec); // Print out JSON
     		
     		// We need to process the orders.
+    		processOrders(orders);
+    	}
+    	else {
+    		
     	}
     }
     
+    private static void processOrders(String orders) throws IOException
+    {
+    	// Read in the file containing the orders.
+    	
+    	FileReader file = new FileReader(orders);
+    	BufferedReader reader = new BufferedReader(file);
+    	
+    	String line = "";
+    	while((line = reader.readLine()) != null)
+    		System.out.println(line);
+    }
     
     private void dumpMachine(MachineSpec machineSpec) {
     	if (machineSpec == null) {
@@ -80,6 +98,4 @@ public class ParseState {
     	}
     }	
 	
-	
-
 }
