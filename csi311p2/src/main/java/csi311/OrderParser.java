@@ -17,7 +17,7 @@ public interface OrderParser {
 	public boolean isValidCustomerID(String customerID);
 	public boolean isValidState(String state);
 	//public boolean isValidOrderDescription(String orderDescription);
-	public boolean isValidQuantity(int quantity);
-	public boolean isValidPrice(float price);
+	public boolean isValidQuantity(String quantity);
+	public boolean isValidPrice(String price);
 	
 }

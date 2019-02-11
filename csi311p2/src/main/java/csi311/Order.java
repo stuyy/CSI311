@@ -25,6 +25,7 @@ public class Order {
 		this.quantity = quantity;
 		this.price = price;
 	}
+	
 	public String getTimestamp() {
 		return timestamp;
 	}

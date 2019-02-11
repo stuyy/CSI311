@@ -111,7 +111,6 @@ public class ParseState implements OrderParser {
 		return orderID.matches("[0-9]{3}\\-[a-zA-z]{3}\\-[0-9]{4}");
 	}
 
-
 	public boolean isValidCustomerID(String customerID) {
 		return customerID.matches("[0-9]{9}");
 	}
@@ -121,40 +120,40 @@ public class ParseState implements OrderParser {
 		List<StateTransitions> states = this.machineSpec.getMachineSpec();
 		
 		for(StateTransitions t : states)
-		{
 			if(t.getState().equalsIgnoreCase(state))
 				return true;
+		
+		return false;
+	}
+	/**
+	 * Check to see if the quantity is a positive integer.
+	 * Returns false if the number is negative, or if a NumberMismatchException occurs.
+	 * @param quantity a quantity passed in as a String
+	 */
+	public boolean isValidQuantity(String quantity) {
+		try {
+			int number = Integer.parseInt(quantity);
+			return number > 0;
 		}
-		return false;
+		catch(Exception ex)
+		{
+			System.out.println(ex);
+			return false;
+		}
 	}
 
 
-	public boolean isValidQuantity(int quantity) {
+	public boolean isValidPrice(String price) {
 		// TODO Auto-generated method stub
-		return false;
+		try {
+			float number = Float.parseFloat(price);
+			return number >= 0.0;
+		}
+		catch(Exception ex)
+		{
+			System.out.println(ex);
+			return false;
+		}
 	}
 
-
-	public boolean isValidPrice(float price) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-    /*
-    public static void main(String[] args) {
-    	ParseState theApp = new ParseState();
-    	String machineFileName = null, ordersFileName = null;
-    	if (args.length == 2) {
-    		machineFileName = args[0]; 
-    		ordersFileName = args[1];
-    	}
-    	try { 
-    		theApp.run(machineFileName, ordersFileName);
-    	}
-    	catch (Exception e) {
-    		System.out.println("Something bad happened!");
-    		e.printStackTrace();
-    	}
-    }
-	*/
 }
