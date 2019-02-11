@@ -45,7 +45,7 @@
           			</descriptorRefs>
 		        	<archive>
 	    				<manifest>
-							<mainClass>csi311.ParseState</mainClass>
+							<mainClass>csi311.Main</mainClass>
 	    				</manifest>
 	  				</archive>
         		</configuration>

@@ -1,20 +1,28 @@
 package csi311;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.regex.Pattern;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import csi311.MachineSpec.StateTransitions; 
 
 public class ParseState implements OrderParser {
 	
-	public ParseState() {
-		
-	}
+	private MachineSpec machineSpec;
 	
+	public ParseState(String machineFileDesc, String orderFileDesc) throws Exception
+	{
+		if(!(new File(machineFileDesc).exists()) || !(new File(orderFileDesc).exists()))
+			throw new Exception("File/s do not exist.");
+		else {
+			System.out.println("Both files exist. Perfect!");
+			// Process the JSON file.
+			String machineJSONString = processFile(machineFileDesc);
+			System.out.println(machineJSONString);
+			this.machineSpec = parseJson(machineJSONString);
+			this.dumpMachine(machineSpec);
+			System.out.println(this.machineSpec.getMachineSpec());
+		}
+	}
 	
     public void run(String machine, String orders) throws Exception {
     	System.out.println("Parse State"); 
@@ -26,7 +34,6 @@ public class ParseState implements OrderParser {
     		dumpMachine(machineSpec); // Print out JSON
     		
     		// We need to process the orders.
-    		this.processOrders(orders);
     		
     	}
     	else {
@@ -44,8 +51,6 @@ public class ParseState implements OrderParser {
     	String line = "";
     	while((line = reader.readLine()) != null)
     		System.out.println(line);
-    	
-    	
     }
     
     private void dumpMachine(MachineSpec machineSpec) {
@@ -84,7 +89,37 @@ public class ParseState implements OrderParser {
         return null;  	
     }
     
-    
+	public boolean isValidTimestamp(String timestamp) {
+		return timestamp.matches("[0-9]{13}");
+	}
+
+	public boolean isValidOrderID(String orderID) {
+		return orderID.matches("[0-9]{3}\\-[a-zA-z]{3}\\-[0-9]{4}");
+	}
+
+
+	public boolean isValidCustomerID(String customerID) {
+		return customerID.matches("[0-9]{9}");
+	}
+
+	public boolean isValidState(String state) {
+		// We must check the Machine and see if it has the state that was passed in.
+		return false;
+	}
+
+
+	public boolean isValidQuantity(int quantity) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	public boolean isValidPrice(float price) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+    /*
     public static void main(String[] args) {
     	ParseState theApp = new ParseState();
     	String machineFileName = null, ordersFileName = null;
@@ -100,42 +135,5 @@ public class ParseState implements OrderParser {
     		e.printStackTrace();
     	}
     }
-
-
-	public boolean isValidTimestamp(String timestamp) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-
-	public boolean isValidOrderID(String orderID) {
-		// TODO Auto-generated method stub
-		boolean flag = orderID.matches("[0-9]{3}\\-[a-zA-z]{3}\\-[0-9]{4}");
-		return flag;
-	}
-
-
-	public boolean isValidCustomerID(String customerID) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-
-	public boolean isValidState(String state) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-
-	public boolean isValidQuantity(int quantity) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-
-	public boolean isValidPrice(float price) {
-		// TODO Auto-generated method stub
-		return false;
-	}	
-	
+	*/
 }
