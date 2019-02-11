@@ -10,7 +10,6 @@ public class Main {
 	public static void main(String[] args) throws Exception
 	{
 		PackageParser parser = new PackageParser();
-		//String fileName = "/Users/anson/Desktop/test.txt";
 		try {
 			File file = new File(args[0]);
 			if(file.exists() || !file.getName().endsWith(".txt")) // Check if file exists.
