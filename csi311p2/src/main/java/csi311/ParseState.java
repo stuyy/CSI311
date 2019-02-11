@@ -14,13 +14,15 @@ public class ParseState {
 	}
 	
 	
-    public void run(String filename) throws Exception {
-    	System.out.println("Parse State");
-    	if (filename != null) {
-    		String json = processFile(filename); 
-    		System.out.println("Raw json = " + json); 
-    		MachineSpec machineSpec = parseJson(json);
-    		dumpMachine(machineSpec); 
+    public void run(String machine, String orders) throws Exception {
+    	System.out.println("Parse State"); 
+    	if (machine != null) {
+    		String json = processFile(machine); // Call processFile to Stringify the JSON.
+    		System.out.println("Raw json = " + json);  // Print out the JSON
+    		MachineSpec machineSpec = parseJson(json); // Convert String to JSON
+    		dumpMachine(machineSpec); // Print out JSON
+    		
+    		// We need to process the orders.
     	}
     }
     
@@ -64,12 +66,13 @@ public class ParseState {
     
     public static void main(String[] args) {
     	ParseState theApp = new ParseState();
-    	String filename = null; 
-    	if (args.length > 0) {
-    		filename = args[0]; 
+    	String machineFileName = null, ordersFileName = null;
+    	if (args.length == 2) {
+    		machineFileName = args[0]; 
+    		ordersFileName = args[1];
     	}
     	try { 
-    		theApp.run(filename);
+    		theApp.run(machineFileName, ordersFileName);
     	}
     	catch (Exception e) {
     		System.out.println("Something bad happened!");

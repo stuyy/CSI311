@@ -25,9 +25,16 @@ public class MachineSpec implements Serializable {
 	}
 	
 	private List<StateTransitions> machineSpec;
-	public MachineSpec() { }
-	public List<StateTransitions> getMachineSpec() { return machineSpec; } 
-	public void setMachineSpec(List<StateTransitions> machineSpec) { this.machineSpec = machineSpec; } 
+	
+	public MachineSpec() { 
+		
+	}
+	public List<StateTransitions> getMachineSpec() { 
+		return machineSpec; 
+	} 
+	public void setMachineSpec(List<StateTransitions> machineSpec) { 
+		this.machineSpec = machineSpec; 
+	} 
 }
 
 
