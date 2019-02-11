@@ -4,12 +4,12 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-
+import java.util.regex.Pattern;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import csi311.MachineSpec.StateTransitions; 
 
-public class ParseState {
+public class ParseState implements OrderParser {
 	
 	public ParseState() {
 		
@@ -26,14 +26,15 @@ public class ParseState {
     		dumpMachine(machineSpec); // Print out JSON
     		
     		// We need to process the orders.
-    		processOrders(orders);
+    		this.processOrders(orders);
+    		
     	}
     	else {
     		
     	}
     }
     
-    private static void processOrders(String orders) throws IOException
+    private void processOrders(String orders) throws IOException
     {
     	// Read in the file containing the orders.
     	
@@ -43,6 +44,8 @@ public class ParseState {
     	String line = "";
     	while((line = reader.readLine()) != null)
     		System.out.println(line);
+    	
+    	
     }
     
     private void dumpMachine(MachineSpec machineSpec) {
@@ -96,6 +99,43 @@ public class ParseState {
     		System.out.println("Something bad happened!");
     		e.printStackTrace();
     	}
-    }	
+    }
+
+
+	public boolean isValidTimestamp(String timestamp) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	public boolean isValidOrderID(String orderID) {
+		// TODO Auto-generated method stub
+		boolean flag = orderID.matches("[0-9]{3}\\-[a-zA-z]{3}\\-[0-9]{4}");
+		return flag;
+	}
+
+
+	public boolean isValidCustomerID(String customerID) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	public boolean isValidState(String state) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	public boolean isValidQuantity(int quantity) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	public boolean isValidPrice(float price) {
+		// TODO Auto-generated method stub
+		return false;
+	}	
 	
 }
