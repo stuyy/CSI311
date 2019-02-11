@@ -1,6 +1,7 @@
 package csi311;
 
 import java.io.*;
+import java.util.List;
 import java.util.regex.Pattern;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import csi311.MachineSpec.StateTransitions; 
@@ -14,13 +15,26 @@ public class ParseState implements OrderParser {
 		if(!(new File(machineFileDesc).exists()) || !(new File(orderFileDesc).exists()))
 			throw new Exception("File/s do not exist.");
 		else {
-			System.out.println("Both files exist. Perfect!");
+			//System.out.println("Both files exist. Perfect!");
 			// Process the JSON file.
 			String machineJSONString = processFile(machineFileDesc);
-			System.out.println(machineJSONString);
+			//System.out.println(machineJSONString);
 			this.machineSpec = parseJson(machineJSONString);
-			this.dumpMachine(machineSpec);
-			System.out.println(this.machineSpec.getMachineSpec());
+			boolean validState = this.isValidState("submitted");
+			System.out.println(validState);
+			// We're going to need a way to get the states.
+			/*
+			List<StateTransitions> states = this.machineSpec.getMachineSpec();
+			for(StateTransitions c : states)
+			{
+				System.out.println("State: " + c.getState());
+				List<String> transitions = c.getTransitions();
+				for(String t : transitions)
+					System.out.print(t + " ");
+				
+				System.out.println();
+			}
+			*/
 		}
 	}
 	
@@ -104,6 +118,13 @@ public class ParseState implements OrderParser {
 
 	public boolean isValidState(String state) {
 		// We must check the Machine and see if it has the state that was passed in.
+		List<StateTransitions> states = this.machineSpec.getMachineSpec();
+		
+		for(StateTransitions t : states)
+		{
+			if(t.getState().equalsIgnoreCase(state))
+				return true;
+		}
 		return false;
 	}
 

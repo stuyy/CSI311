@@ -7,6 +7,12 @@ import java.util.List;
 public class MachineSpec implements Serializable {
 
 	// Since defined as an inner class, must be declared static or Jackson can't deal.
+	/**
+	 * StateTransition is a static class that represents the current State of a State Machine.
+	 * It also has a List of Transitions
+	 * @author Anson
+	 *
+	 */
 	public static class StateTransitions implements Serializable {
 		private String state; 
 		private List<String> transitions;
