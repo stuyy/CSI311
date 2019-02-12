@@ -30,6 +30,7 @@ public class ParseState implements OrderParser {
 	private MachineSpec machineSpec;
 	private HashMap<String, Order> orders;
 	private ArrayList<String> invalidOrders;
+	private HashMap<String, Integer> correctOrderCount;
 	// We need the flagged orders.
 	// We need all orders that are pending.
 	// We need all orders that are fulfilled.
@@ -48,6 +49,7 @@ public class ParseState implements OrderParser {
 			this.machineSpec = parseJson(machineJSONString);
 			this.orders = new HashMap<String, Order>();
 			this.invalidOrders = new ArrayList<String>();
+			this.correctOrderCount = new HashMap<String, Integer>();
 			this.processOrders(orderFileDesc);
 		}
 	}
@@ -89,6 +91,21 @@ public class ParseState implements OrderParser {
         			String nextState = tokens[3];
         			// Let's call a method passing in the current state and the next state and see if it's a valid transition.
         			boolean validTransition = this.isValidTransition(currentState, nextState);
+        			// We need to now update the state if it's a valid transition.
+        			if(validTransition) // Update state.
+        				this.updateOrderState(tokens[1], nextState);
+        			
+        			else { // If it's not a valid transition, we will remove the already validated order from the HashMap and add it to the list of invalid orders.
+        				
+        				System.out.println("Flagging order: " + tokens[1]);
+        				if(this.orders.containsKey(tokens[1]))
+        					this.orders.remove(tokens[1]);
+        				
+        				if(this.invalidOrders.contains(tokens[1]))
+        					continue;
+        				else
+        					this.invalidOrders.add(tokens[1]);
+        			}
         		}
         		else { // If the orderID does not exist as a key in the HashMap, we will create a new Order
         			// Object and add it as a value of the orderID key.
@@ -96,17 +113,59 @@ public class ParseState implements OrderParser {
             				tokens[3], tokens[4], Integer.parseInt(tokens[5]), Float.parseFloat(tokens[6]));
             		// Since the order is valid, let's add it to a Map, where the key will be the orderID and it's value will be an Order.
             		this.orders.put(order.getOrderID(), order);
-            		System.out.println(this.orders.get(order.getOrderID()).toString());
         		}
         	}
         	else // We can immediately add the invalid orders (the ones with invalid fields) to a List.
-        		this.invalidOrders.add(tokens[1]);
+        	{
+        		System.out.println("Flagging order: " + tokens[1]);
+        		if(this.invalidOrders.contains(tokens[1]))
+					continue;
+				else
+					this.invalidOrders.add(tokens[1]);
+        	}
         	
         	
     	}
     	// In the end, we should have a Mapping of all Order ID's to it's Order.
+    	this.generateReport();
+    	
     }
     
+    private void generateReport()
+    {
+    	// Print the invalid orders first.
+    	
+    	Iterator iter = this.orders.entrySet().iterator();
+    	while(iter.hasNext())
+    	{
+    		Map.Entry pair = (Map.Entry) iter.next();
+    		String key = (String) pair.getKey();
+    		Order order = this.orders.get(key);
+    		if(this.correctOrderCount.containsKey(order.getState()))
+    		{
+    			int newValue = this.correctOrderCount.get(order.getState());
+    			this.correctOrderCount.put(order.getState(), ++newValue);
+    		}
+    		else {
+    			this.correctOrderCount.put(order.getState(), 1);
+    		}
+    	}
+    	
+    	iter = this.correctOrderCount.entrySet().iterator();
+    	while(iter.hasNext())
+    	{
+    		Map.Entry pair = (Map.Entry) iter.next();
+    		System.out.println(pair.getKey() + ": " + pair.getValue());
+    	}
+    	System.out.println("flagged: " + this.invalidOrders.size());
+    		
+    }
+    /**
+     * Takes in a state and a transition to another state and validates if that state transition is legal.
+     * @param currentState
+     * @param nextState
+     * @return
+     */
     private boolean isValidTransition(String currentState, String nextState)
     {
     	if(!this.isValidState(currentState) && !this.isValidState(nextState))
@@ -116,22 +175,21 @@ public class ParseState implements OrderParser {
     	{
     		List<State> states = this.machineSpec.getMachineSpec();
         	for(State t : states)
-        	{
         		if(t.getState().equalsIgnoreCase(currentState))
-        		{
-        			List<String> stateTransitions = t.getTransitions();
-            		if(stateTransitions.contains(nextState))
-            		{
-            			System.out.println("The state " + t.getState() + " contains the transition " + nextState);
-            		}
-        		}
-        	}
-        	System.out.println();
+            		if(t.getTransitions().contains(nextState))
+            			return true; // If the transition is part of the State, we return true.
+        	
     	}
     	return false;
-    	
     }
     
+    private void updateOrderState(String key, String nextState)
+    {
+    	if(this.orders.containsKey(key))
+    	{
+    		this.orders.get(key).setState(nextState);
+    	}
+    }
     private void trimWhitespace(String [] tokens)
     {
     	for(int i = 0; i < tokens.length; i++)
