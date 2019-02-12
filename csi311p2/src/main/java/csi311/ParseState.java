@@ -85,7 +85,13 @@ public class ParseState implements OrderParser {
         		{
         			// We see that the order does contain the current key.
         			String currentState = this.orders.get(tokens[1]).getState(); // Get the current state of the order.
-        			System.out.println(currentState);
+        			System.out.println("The current state of the order is: " + currentState);
+        			// We already validated everything, so whichever state was retrieved from the Order object returned from the key is a valid state.
+        			// We check the next State, and see if it is a valid transition from the current state to the next state.
+        			String nextState = tokens[3];
+        			System.out.println("The next state is: " + nextState);
+        			
+        			// Let's call a method passing in the current state and the next state and see if it's a valid transition.
         		}
         		else { // If the orderID does not exist as a key in the HashMap, we will create a new Order
         			// Object and add it as a value of the orderID key.
@@ -102,6 +108,12 @@ public class ParseState implements OrderParser {
         	
     	}
     	// In the end, we should have a Mapping of all Order ID's to it's Order.
+    }
+    
+    private boolean isValidTransition(String currentState, String nextState)
+    {
+    	
+    	return false;
     }
     
     private void trimWhitespace(String [] tokens)
