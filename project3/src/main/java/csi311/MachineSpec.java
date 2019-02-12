@@ -16,10 +16,18 @@ public class MachineSpec implements Serializable {
 	public static class State implements Serializable {
 		private String state; 
 		private List<String> transitions;
-		public State() { }
-		public String getState() { return state; }
-		public void setState(String state) { this.state = state.toLowerCase(); } 
-		public List<String> getTransitions() { return transitions; } 
+		public State() { 
+			
+		}
+		public String getState() { 
+			return this.state; 
+		}
+		public void setState(String state) { 
+			this.state = state.toLowerCase(); 
+		} 
+		public List<String> getTransitions() { 
+			return this.transitions; 
+		} 
 		public void setTransitions(List<String> transitions) { 
 			this.transitions = transitions;
 			if (this.transitions != null) {
@@ -27,11 +35,11 @@ public class MachineSpec implements Serializable {
 					transitions.set(i, transitions.get(i).toLowerCase()); 
 				}
 			}
-		} 
+		}
 	}
 	
 	private List<State> machineSpec;
-	
+	private Integer tenantId;
 	public MachineSpec() { 
 		
 	}
@@ -41,6 +49,13 @@ public class MachineSpec implements Serializable {
 	public void setMachineSpec(List<State> machineSpec) { 
 		this.machineSpec = machineSpec; 
 	} 
+	public void setTenantId(Integer tenantId)
+	{
+		this.tenantId = tenantId;
+	}
+	public Integer getTentantId() {
+		return this.tenantId;
+	}
 }
 
 

@@ -5,11 +5,19 @@ import java.io.FileReader;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import csi311.MachineSpec.State;
+
 public class Driver {
-	public static void main(String [] args)
+	public static void main(String [] args) throws Exception
 	{
-		
+		System.out.println(args[0] + " " + args[1]);
+		Driver d = new Driver();
+		String s = d.processFile(args[1]);
+		System.out.println(s);
+		MachineSpec m = d.parseJson(s);
+		d.dumpMachine(m);
 	}
+	
 	private String processFile(String filename) throws Exception {
     	System.out.println("Processing file: " + filename); 
     	BufferedReader br = new BufferedReader(new FileReader(filename));  
@@ -38,4 +46,13 @@ public class Driver {
         }
         return null;  	
     }
+    private void dumpMachine(MachineSpec machineSpec) {
+    	if (machineSpec == null) {
+    		return;
+    	}
+    	for (State st : machineSpec.getMachineSpec()) {
+    		System.out.println(st.getState() + " : " + st.getTransitions());
+    	}
+    }
+
 }
