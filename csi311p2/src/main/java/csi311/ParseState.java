@@ -23,7 +23,7 @@ import java.io.*;
 import java.util.*;
 import java.util.regex.Pattern;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import csi311.MachineSpec.StateTransitions; 
+import csi311.MachineSpec.State; 
 
 public class ParseState implements OrderParser {
 	
@@ -85,13 +85,10 @@ public class ParseState implements OrderParser {
         		{
         			// We see that the order does contain the current key.
         			String currentState = this.orders.get(tokens[1]).getState(); // Get the current state of the order.
-        			System.out.println("The current state of the order is: " + currentState);
         			// We already validated everything, so whichever state was retrieved from the Order object returned from the key is a valid state.
-        			// We check the next State, and see if it is a valid transition from the current state to the next state.
         			String nextState = tokens[3];
-        			System.out.println("The next state is: " + nextState);
-        			
         			// Let's call a method passing in the current state and the next state and see if it's a valid transition.
+        			boolean validTransition = this.isValidTransition(currentState, nextState);
         		}
         		else { // If the orderID does not exist as a key in the HashMap, we will create a new Order
         			// Object and add it as a value of the orderID key.
@@ -112,8 +109,27 @@ public class ParseState implements OrderParser {
     
     private boolean isValidTransition(String currentState, String nextState)
     {
+    	if(!this.isValidState(currentState) && !this.isValidState(nextState))
+    		return false;
     	
+    	else
+    	{
+    		List<State> states = this.machineSpec.getMachineSpec();
+        	for(State t : states)
+        	{
+        		if(t.getState().equalsIgnoreCase(currentState))
+        		{
+        			List<String> stateTransitions = t.getTransitions();
+            		if(stateTransitions.contains(nextState))
+            		{
+            			System.out.println("The state " + t.getState() + " contains the transition " + nextState);
+            		}
+        		}
+        	}
+        	System.out.println();
+    	}
     	return false;
+    	
     }
     
     private void trimWhitespace(String [] tokens)
@@ -154,7 +170,7 @@ public class ParseState implements OrderParser {
     	if (machineSpec == null) {
     		return;
     	}
-    	for (StateTransitions st : machineSpec.getMachineSpec()) {
+    	for (State st : machineSpec.getMachineSpec()) {
     		System.out.println(st.getState() + " : " + st.getTransitions());
     	}
     }
@@ -215,9 +231,9 @@ public class ParseState implements OrderParser {
 	 */
 	public boolean isValidState(String state) {
 		// We must check the Machine and see if it has the state that was passed in.
-		List<StateTransitions> states = this.machineSpec.getMachineSpec();
+		List<State> states = this.machineSpec.getMachineSpec();
 		
-		for(StateTransitions t : states)
+		for(State t : states)
 			if(t.getState().equalsIgnoreCase(state.trim()))
 				return true;
 		

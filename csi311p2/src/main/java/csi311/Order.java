@@ -1,6 +1,6 @@
 package csi311;
 
-import csi311.MachineSpec.StateTransitions; 
+import csi311.MachineSpec.State; 
 
 public class Order {
 	private String timestamp;

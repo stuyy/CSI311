@@ -13,10 +13,10 @@ public class MachineSpec implements Serializable {
 	 * @author Anson
 	 *
 	 */
-	public static class StateTransitions implements Serializable {
+	public static class State implements Serializable {
 		private String state; 
 		private List<String> transitions;
-		public StateTransitions() { }
+		public State() { }
 		public String getState() { return state; }
 		public void setState(String state) { this.state = state.toLowerCase(); } 
 		public List<String> getTransitions() { return transitions; } 
@@ -30,15 +30,15 @@ public class MachineSpec implements Serializable {
 		} 
 	}
 	
-	private List<StateTransitions> machineSpec;
+	private List<State> machineSpec;
 	
 	public MachineSpec() { 
 		
 	}
-	public List<StateTransitions> getMachineSpec() { 
+	public List<State> getMachineSpec() { 
 		return machineSpec; 
 	} 
-	public void setMachineSpec(List<StateTransitions> machineSpec) { 
+	public void setMachineSpec(List<State> machineSpec) { 
 		this.machineSpec = machineSpec; 
 	} 
 }
