@@ -84,7 +84,8 @@ public class ParseState implements OrderParser {
         		if(this.orders.containsKey(tokens[1]))
         		{
         			// We see that the order does contain the current key.
-        			String currentState = this.orders.get(tokens[1]).getState()); // Get the current state of the order.
+        			String currentState = this.orders.get(tokens[1]).getState(); // Get the current state of the order.
+        			System.out.println(currentState);
         		}
         		else { // If the orderID does not exist as a key in the HashMap, we will create a new Order
         			// Object and add it as a value of the orderID key.

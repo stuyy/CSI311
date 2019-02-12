@@ -28,6 +28,7 @@ public class Order {
 		this.customerID = customerID;
 		this.quantity = quantity;
 		this.price = price;
+		this.state = state;
 	}
 	
 	public String getTimestamp() {
