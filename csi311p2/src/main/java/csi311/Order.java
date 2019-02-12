@@ -11,6 +11,10 @@ public class Order {
 	private int quantity;
 	private float price;
 	
+	public Order()
+	{
+		
+	}
 	public Order(String timestamp, String orderID, 
 			String customerID, 
 			String state, 
@@ -67,5 +71,11 @@ public class Order {
 	}
 	public void setPrice(float price) {
 		this.price = price;
+	}
+	@Override
+	public String toString() {
+		return "Order [timestamp=" + timestamp + ", orderID=" + orderID + ", customerID=" + customerID + ", state="
+				+ state + ", orderDescription=" + orderDescription + ", quantity=" + quantity + ", price=" + price
+				+ "]";
 	}
 }	
