@@ -42,7 +42,6 @@ public class SqlDemo {
         }
     }
     
-    
     private void createTable() {
         try {
             stmt = conn.createStatement();
@@ -113,8 +112,6 @@ public class SqlDemo {
             sqlExcept.printStackTrace();
         }
     }
-    
-    
     private void shutdown() {
         try {
             if (stmt != null) {
