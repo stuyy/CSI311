@@ -31,8 +31,45 @@ public class Database {
 	{
 		try {
 			this.sqlStatement = this.sqlConnection.createStatement();
-			this.sqlStatement.execute("CREATE TABLE IF NOT EXISTS Tenants (" +
-					"tenantID INT NOT NULL PRIMARY KEY");
+			this.sqlStatement.execute("CREATE TABLE Tenants (tenantId INT NOT NULL PRIMARY KEY)");
+			this.sqlStatement.close();
+		}
+		catch(SQLException ex)
+		{
+			if(!this.tableAlreadyExists(ex))
+			{
+				System.out.println(ex);
+			}
+		}
+	}
+	
+	private boolean tableAlreadyExists(SQLException e) {
+        boolean exists;
+        if(e.getSQLState().equals("X0Y32")) {
+            exists = true;
+        } else {
+            exists = false;
+        }
+        return exists;
+    }
+	
+	private void showTable()
+	{
+		try {
+			this.sqlStatement = this.sqlConnection.createStatement();
+			ResultSet results = this.sqlStatement.executeQuery("SELECT * FROM Tenants");
+			ResultSetMetaData md = results.getMetaData();
+			
+			for (int i=1; i <= md.getColumnCount(); i++) {
+                //print Column Names
+                System.out.print(md.getColumnLabel(1)+"\t\t");  
+            }
+			System.out.println("\n-------------------------------------------------");
+			while(results.next()) {
+				int tenantId = results.getInt(1);
+				System.out.println(tenantId);
+            }
+			results.close();
 			this.sqlStatement.close();
 		}
 		catch(SQLException ex)
@@ -41,17 +78,26 @@ public class Database {
 		}
 	}
 	
-	private void showTable()
+	private void insertTenant(int tenantId)
 	{
 		try {
 			this.sqlStatement = this.sqlConnection.createStatement();
-			this.sqlStatement.execute("SELECT * FROM Tenants");
+			this.sqlStatement.execute("INSERT INTO TENANTS VALUES (" + tenantId + ")");
 			this.sqlStatement.close();
 		}
 		catch(SQLException ex)
 		{
 			System.out.println(ex);
 		}
+	}
+	
+	public static void main(String [] args)
+	{
+		Database db = new Database();
+		db.createConnection();
+		db.createTables();
+		db.showTable();
+		
 	}
 	
 }
