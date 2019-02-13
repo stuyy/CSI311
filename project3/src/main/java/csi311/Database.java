@@ -36,20 +36,28 @@ public class Database {
 		}
 		catch(SQLException ex)
 		{
-			if(!this.tableAlreadyExists(ex))
-			{
-				System.out.println(ex);
-			}
+			System.out.println(ex);
 		}
 		
 		try {
 			this.sqlStatement = this.sqlConnection.createStatement();
-			this.sqlStatement.execute("CREATE TABLE StateMachine (stateMachineId INT NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), tenantId INT NOT NULL REFERENCES Tenants(tenantId), stateName VARCHAR(30) NOT NULL, transitions VARCHAR(500) NOT NULL)");
+			this.sqlStatement.execute("CREATE TABLE StateMachine (stateMachineId INT NOT NULL primary key GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), tenantId INT NOT NULL REFERENCES Tenants(tenantId))");
 			this.sqlStatement.close();
 		}
 		catch(SQLException ex)
 		{
 			System.out.println(ex);
+		}
+		
+		try {
+			this.sqlStatement = this.sqlConnection.createStatement();
+			this.sqlStatement.execute("CREATE TABLE State (stateId INT NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), smID INT NOT NULL REFERENCES StateMachine(stateMachineId), stateName VARCHAR(50), transitions VARCHAR(500))");
+			this.sqlStatement.close();
+			
+		}
+		catch(Exception ex)
+		{
+			System.out.println("Hi: " + ex);
 		}
 		
 	}
@@ -160,14 +168,7 @@ public class Database {
 		Database db = new Database();
 		db.createConnection();
 		db.createTables();
-		db.selectTenants();
-		db.selectStateMachine();
 		
-		db.insertTenant(12345);
-		db.insertStateMachine();
-		
-		db.selectStateMachine();
-		db.selectTenants();
 	}
 	
 }
