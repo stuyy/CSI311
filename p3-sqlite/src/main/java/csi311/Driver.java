@@ -20,8 +20,11 @@ public class Driver {
 				{
 					String jsonString = FileProcessor.processFile(filePath);
 					MachineSpec machineSpec = FileProcessor.parseJson(jsonString);
-					FileProcessor.dumpMachine(machineSpec);
 					Database db = new Database(machineSpec);
+					db.createSchema();
+					db.displayTenants();
+					db.displayStateMachines();
+					db.displayStates();
 				}
 				else if(mode.equalsIgnoreCase("--order"))
 				{

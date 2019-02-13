@@ -1,20 +1,29 @@
 package csi311;
 
 import java.sql.*;
+import java.util.List;
+import java.util.Map;
 
+import csi311.MachineSpec.State; 
+import java.util.HashMap;
+import java.util.Iterator;
 public class Database {
 	
 	private final String dbConnectionURI = "jdbc:sqlite:ordersdb.db";
 	private Connection connection;
 	private Statement statement;
 	private MachineSpec machineSpec;
+	private HashMap<String, List> cachedStates;
 	
 	public Database(MachineSpec machineSpec)
 	{
 		try {
+			Class.forName("org.sqlite.JDBC");
 			this.connection = DriverManager.getConnection(this.dbConnectionURI);
 			System.out.println("Successfully connected to the database.");
 			this.machineSpec = machineSpec;
+			this.cachedStates = new HashMap();
+			this.insert();
 		}
 		catch(Exception ex)
 		{
@@ -26,16 +35,71 @@ public class Database {
 	{
 		return this.machineSpec;
 	}
+	
+	public void insert()
+	{
+		// Let's insert the tenantId first.
+		this.insertTenant(this.machineSpec.getTentantId());
+		// Now that the tenant is inserted, we will insert the state machine into the db.
+		int value = this.insertStateMachine(this.machineSpec.getTentantId());
+		System.out.println("The state machine is: " + value);
+		// Now insert all of the States with the foreign key value.
+		this.insertStates(value);
+		
+		
+	}
+	// Insert into the tables.
+	
+	public void insertTenant(int id)
+	{
+		this.executeStatement("INSERT INTO Tenants VALUES(" + id + ")");
+	}
+	
+	public int insertStateMachine(int tenantId)
+	{
+		this.executeStatement("INSERT INTO StateMachine (stateMachineTenantId) VALUES (" + tenantId + ")");
+		try {
+			ResultSet result = this.statement.executeQuery("SELECT * FROM StateMachine WHERE stateMachineTenantId = " + tenantId);
+			ResultSetMetaData md = result.getMetaData();
+			int stateMachineId = result.getInt(1);
+			result.close();
+			return stateMachineId;
+		}
+		catch(SQLException ex)
+		{
+			System.out.println(ex);
+			return -1;
+		}
+	}
+	
+	public void insertStates(int stateMachineId)
+	{
+		List<State> states = this.machineSpec.getMachineSpec();
+		for(State s : states)
+		{
+			List<String> transitions = s.getTransitions();
+			this.cachedStates.put(s.getState(), transitions);
+		}
+		
+		Iterator iter = this.cachedStates.entrySet().iterator();
+		while(iter.hasNext())
+		{
+			Map.Entry pair = (Map.Entry) iter.next();
+    		
+    		String stateName = pair.getKey().toString();
+    		String transitionSet = pair.getValue().toString().replaceAll("[\\[\\]]", "").trim();
+    		System.out.println(transitionSet);
+    		this.executeStatement("INSERT INTO State (stateMachineId, stateName, transitions) VALUES(\'" +  stateMachineId + "\', \'" + stateName + "\', \'" + transitionSet +"\')");
+		}
+	}
 	public void createSchema()
 	{
+		//this.executeStatement("DROP TABLE STATE");
 		// We want to create some tables.
-		this.executeStatement("DROP TABLE IF EXISTS Tenants");
-		this.executeStatement("DROP TABLE IF EXISTS StateMachine");
 		this.executeStatement("Create table IF NOT EXISTS Tenants (tenantId INTEGER NOT NULL PRIMARY KEY)");
 		this.executeStatement("Create table IF NOT EXISTS StateMachine " +
-				"(stateMachineId INTEGER NOT NULL PRIMARY KEY, " +
-				"tenantId INTEGER NOT NULL, " + 
-				"FOREIGN KEY (tenantId) REFERENCES Tenants(tenantId))");
+				"(stateMachineTenantId INTEGER NOT NULL PRIMARY KEY, " +
+				"FOREIGN KEY (stateMachineTenantId) REFERENCES State(stateMachineId))");
 		
 		this.executeStatement("CREATE TABLE IF NOT EXISTS State (" + 
 				"stateId INTEGER NOT NULL PRIMARY KEY, " +
@@ -83,8 +147,7 @@ public class Database {
 			System.out.println("\n-------------------------------------------------");
 			while(result.next()) {
 				int stateMachineId = result.getInt(1);
-				int tenantId = result.getInt(2);
-				System.out.println(stateMachineId + "\t\t\t" + tenantId);
+				System.out.println(stateMachineId);
             }
 			result.close();
 			this.statement.close();
@@ -111,7 +174,7 @@ public class Database {
 				int stateMachineId = result.getInt(2);
 				String stateName = result.getString(3);
 				String transitionSet = result.getString(4);
-				System.out.println(stateId + "\t\t\t" + stateMachineId + "\t\t\t" + stateName + "\t\t\t" + transitionSet);
+				System.out.printf("%1s\t%20s\t%20s\t\t%12s\n", stateId, stateMachineId, stateName, transitionSet);
             }
 			result.close();
 			this.statement.close();
