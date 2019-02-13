@@ -10,12 +10,16 @@ import csi311.MachineSpec.State;
 public class Driver {
 	public static void main(String [] args) throws Exception
 	{
+		/*
 		System.out.println(args[0] + " " + args[1]);
 		Driver d = new Driver();
 		String s = d.processFile(args[1]);
 		System.out.println(s);
 		MachineSpec m = d.parseJson(s);
 		d.dumpMachine(m);
+		*/
+		
+		Database db = new Database();
 	}
 	
 	private String processFile(String filename) throws Exception {
