@@ -20,6 +20,8 @@ public class Driver {
 		*/
 		
 		Database db = new Database();
+		db.createSchema();
+		db.displayTenants();
 	}
 	
 	private String processFile(String filename) throws Exception {
