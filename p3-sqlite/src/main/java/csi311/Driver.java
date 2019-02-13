@@ -10,55 +10,38 @@ import csi311.MachineSpec.State;
 public class Driver {
 	public static void main(String [] args) throws Exception
 	{
-		/*
-		System.out.println(args[0] + " " + args[1]);
-		Driver d = new Driver();
-		String s = d.processFile(args[1]);
-		System.out.println(s);
-		MachineSpec m = d.parseJson(s);
-		d.dumpMachine(m);
-		*/
-		
-		Database db = new Database();
-		db.createSchema();
-		db.displayTenants();
+		try {
+			if(args.length == 2)
+			{
+				String mode = args[0];
+				String filePath = args[1];
+				
+				if(mode.equalsIgnoreCase("--state"))
+				{
+					String jsonString = FileProcessor.processFile(filePath);
+					MachineSpec machineSpec = FileProcessor.parseJson(jsonString);
+					FileProcessor.dumpMachine(machineSpec);
+					Database db = new Database(machineSpec);
+				}
+				else if(mode.equalsIgnoreCase("--order"))
+				{
+					// Process Order
+				}
+				else if(mode.equalsIgnoreCase("--report"))
+				{
+					// Process report.
+				}
+			}
+			else {
+				throw new Exception("Invalid amount of arguments.");
+			}
+		}
+		catch(Exception ex)
+		{
+			System.out.println(ex);
+		}
 	}
 	
-	private String processFile(String filename) throws Exception {
-    	System.out.println("Processing file: " + filename); 
-    	BufferedReader br = new BufferedReader(new FileReader(filename));  
-    	String json = "";
-    	String line; 
-    	while ((line = br.readLine()) != null) {
-    		json += " " + line; 
-    	} 
-    	br.close();
-    	// Get rid of special characters - newlines, tabs.  
-    	return json.replaceAll("\n", " ").replaceAll("\t", " ").replaceAll("\r", " "); 
-    }
-    /**
-     * Method provided from the sample code 1.5
-     * @param json - a Stringified version of the JSON objects.
-     * @return a MachineSpec instance or null.
-     */
-    private MachineSpec parseJson(String json) {
-        ObjectMapper mapper = new ObjectMapper();
-        try { 
-        	MachineSpec machineSpec = mapper.readValue(json, MachineSpec.class);
-        	return machineSpec; 
-        }
-        catch (Exception e) {
-            e.printStackTrace(); 
-        }
-        return null;  	
-    }
-    private void dumpMachine(MachineSpec machineSpec) {
-    	if (machineSpec == null) {
-    		return;
-    	}
-    	for (State st : machineSpec.getMachineSpec()) {
-    		System.out.println(st.getState() + " : " + st.getTransitions());
-    	}
-    }
+	
 
 }
