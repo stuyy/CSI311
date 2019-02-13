@@ -44,7 +44,7 @@ public class Database {
 		
 		try {
 			this.sqlStatement = this.sqlConnection.createStatement();
-			this.sqlStatement.execute("CREATE TABLE StateMachine (stateMachineId INT NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), tenantId INT NOT NULL REFERENCES Tenants(tenantId))");
+			this.sqlStatement.execute("CREATE TABLE StateMachine (stateMachineId INT NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), tenantId INT NOT NULL REFERENCES Tenants(tenantId), stateName VARCHAR(30) NOT NULL, transitions VARCHAR(500) NOT NULL)");
 			this.sqlStatement.close();
 		}
 		catch(SQLException ex)
@@ -52,19 +52,6 @@ public class Database {
 			System.out.println(ex);
 		}
 		
-		try {
-			
-			this.sqlStatement = this.sqlConnection.createStatement();
-			this.sqlStatement.execute("INSERT INTO Tenants VALUES (123445)");
-			this.sqlStatement.execute("INSERT INTO StateMachine VALUES(DEFAULT, 123445)");
-			this.sqlStatement.close();
-			 
-		}
-		
-		catch(Exception ex)
-		{
-			System.out.println(ex);
-		}
 	}
 	
 	private void dropTable(String tableName)
@@ -123,13 +110,15 @@ public class Database {
 			
 			for (int i=1; i <= md.getColumnCount(); i++) {
                 //print Column Names
-                System.out.print(md.getColumnLabel(1)+"\t\t");  
+                System.out.print(md.getColumnLabel(i)+"\t\t");  
             }
-			System.out.println("\n-------------------------------------------------");
+			System.out.println("\n---------------------------------------------------------------------------------------------");
 			while(results.next()) {
 				int stateMachineId = results.getInt(1);
 				int tenantId = results.getInt(2);
-				System.out.println(stateMachineId + "\t\t\t" + tenantId);
+				String state = results.getString(3);
+				String transitions = results.getString(4);
+				System.out.println(stateMachineId + "\t\t\t" + tenantId + "\t\t\t" + state + "\t\t\t" + transitions);
             }
 			results.close();
 			this.sqlStatement.close();
@@ -140,6 +129,19 @@ public class Database {
 		}
 	}
 	
+	private void insertStateMachine()
+	{
+		try {
+			this.sqlStatement = this.sqlConnection.createStatement();
+			this.sqlStatement.execute("INSERT INTO StateMachine VALUES (DEFAULT, 12345, 'PENDING', 'Pending, Cancelled, Fulfilled')");
+			this.sqlStatement.close();
+		}
+		catch(Exception ex)
+		{
+			System.out.println(ex);
+		}
+		
+	}
 	private void insertTenant(int tenantId)
 	{
 		try {
@@ -161,6 +163,11 @@ public class Database {
 		db.selectTenants();
 		db.selectStateMachine();
 		
+		db.insertTenant(12345);
+		db.insertStateMachine();
+		
+		db.selectStateMachine();
+		db.selectTenants();
 	}
 	
 }
