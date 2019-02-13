@@ -41,8 +41,44 @@ public class Database {
 				System.out.println(ex);
 			}
 		}
+		
+		try {
+			this.sqlStatement = this.sqlConnection.createStatement();
+			this.sqlStatement.execute("CREATE TABLE StateMachine (stateMachineId INT NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), tenantId INT NOT NULL REFERENCES Tenants(tenantId))");
+			this.sqlStatement.close();
+		}
+		catch(SQLException ex)
+		{
+			System.out.println(ex);
+		}
+		
+		try {
+			
+			this.sqlStatement = this.sqlConnection.createStatement();
+			this.sqlStatement.execute("INSERT INTO Tenants VALUES (123445)");
+			this.sqlStatement.execute("INSERT INTO StateMachine VALUES(DEFAULT, 123445)");
+			this.sqlStatement.close();
+			 
+		}
+		
+		catch(Exception ex)
+		{
+			System.out.println(ex);
+		}
 	}
 	
+	private void dropTable(String tableName)
+	{
+		try {
+			this.sqlStatement = this.sqlConnection.createStatement();
+			this.sqlStatement.execute("DROP TABLE " + tableName);
+			this.sqlStatement.close();
+		}
+		catch(SQLException ex)
+		{
+			System.out.println(ex);
+		}
+	}
 	private boolean tableAlreadyExists(SQLException e) {
         boolean exists;
         if(e.getSQLState().equals("X0Y32")) {
@@ -53,7 +89,7 @@ public class Database {
         return exists;
     }
 	
-	private void showTable()
+	private void selectTenants()
 	{
 		try {
 			this.sqlStatement = this.sqlConnection.createStatement();
@@ -68,6 +104,32 @@ public class Database {
 			while(results.next()) {
 				int tenantId = results.getInt(1);
 				System.out.println(tenantId);
+            }
+			results.close();
+			this.sqlStatement.close();
+		}
+		catch(SQLException ex)
+		{
+			System.out.println(ex);
+		}
+	}
+	
+	private void selectStateMachine()
+	{
+		try {
+			this.sqlStatement = this.sqlConnection.createStatement();
+			ResultSet results = this.sqlStatement.executeQuery("SELECT * FROM StateMachine");
+			ResultSetMetaData md = results.getMetaData();
+			
+			for (int i=1; i <= md.getColumnCount(); i++) {
+                //print Column Names
+                System.out.print(md.getColumnLabel(1)+"\t\t");  
+            }
+			System.out.println("\n-------------------------------------------------");
+			while(results.next()) {
+				int stateMachineId = results.getInt(1);
+				int tenantId = results.getInt(2);
+				System.out.println(stateMachineId + "\t\t\t" + tenantId);
             }
 			results.close();
 			this.sqlStatement.close();
@@ -96,7 +158,8 @@ public class Database {
 		Database db = new Database();
 		db.createConnection();
 		db.createTables();
-		db.showTable();
+		db.selectTenants();
+		db.selectStateMachine();
 		
 	}
 	
