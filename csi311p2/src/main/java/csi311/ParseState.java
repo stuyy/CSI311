@@ -31,6 +31,10 @@ public class ParseState implements OrderParser {
 	private HashMap<String, Order> orders;
 	private ArrayList<String> invalidOrders;
 	private HashMap<String, Integer> correctOrderCount;
+	private ArrayList<String> startStates;
+	private ArrayList<String> statusFromFiles;
+	private ArrayList<String> terminalStates;
+	
 	// We need the flagged orders.
 	// We need all orders that are pending.
 	// We need all orders that are fulfilled.
@@ -47,9 +51,19 @@ public class ParseState implements OrderParser {
 			String machineJSONString = processFile(machineFileDesc);
 			
 			this.machineSpec = parseJson(machineJSONString);
+			
 			this.orders = new HashMap<String, Order>();
 			this.invalidOrders = new ArrayList<String>();
 			this.correctOrderCount = new HashMap<String, Integer>();
+			this.startStates = new ArrayList<String>();
+			this.statusFromFiles = new ArrayList<String>();
+			this.terminalStates = new ArrayList<String>();
+			
+			for(State st : this.machineSpec.getMachineSpec())
+				this.startStates.add(st.getState().toLowerCase());
+			
+
+			this.setAllTransitions(orderFileDesc);
 			this.processOrders(orderFileDesc);
 		}
 	}
@@ -82,6 +96,9 @@ public class ParseState implements OrderParser {
         	if(status)
         	{
         		// Inside here, we will first check if the HashMap contains the OrderID as a Key.
+        		// First we should check the invalid orders, if the order id is in the invalid order list, then it cannot be deemed as valid.
+        		if(this.invalidOrders.contains(tokens[1]))
+        			continue;
         		
         		if(this.orders.containsKey(tokens[1]))
         		{
@@ -214,10 +231,33 @@ public class ParseState implements OrderParser {
     		validFields[4] = this.isValidQuantity(fields[5]);
     		validFields[5] = this.isValidPrice(fields[6]);
     		
+    		// We only need to check if the state is a start state if the order is not in the HashMap.
+    		
+    		if(this.orders.containsKey(fields[1]))
+    		{
+    			
+    		}
+    		else {
+    			// Check if the state that was validated is a start state.
+    			if(this.isValidStartState(fields[3]))
+    			{
+    				validFields[3] = true;
+    			}
+    			else
+    				validFields[3] = false;
+    		}
+    		
     		return validFields[0] && validFields[1] && validFields[2] && validFields[3] && validFields[4] && validFields[5];
     	}
     }
     
+    private boolean isValidStartState(String state)
+    {
+    	if(this.startStates.contains(state.toLowerCase()))
+    		return true;
+    	else
+    		return false;
+    }
     
     /**
      * Method provided from the sample code 1.5
@@ -330,5 +370,29 @@ public class ParseState implements OrderParser {
 			System.out.println(ex);
 			return false;
 		}
+	}
+	
+	private void setAllTransitions(String orderFile) throws IOException
+	{
+		BufferedReader reader = new BufferedReader(new FileReader(orderFile));
+		String line = "";
+		while((line = reader.readLine()) != null)
+		{
+			String [] tokens = line.split(",");
+			//System.out.println(tokens[3].trim());
+			if(this.statusFromFiles.contains(tokens[3].trim().toLowerCase()))
+				continue;
+			else
+				this.statusFromFiles.add(tokens[3].trim().toLowerCase());
+		}
+		
+		for(String st : this.statusFromFiles)
+			System.out.println(st);
+	}
+	
+	private void setTerminalStates()
+	{
+		// Loop through the states, check the transitions. If the transitions match any of the states, continue.
+		// If they don't, then the transition is a terminal state, add it to the list of terminal states.
 	}
 }
