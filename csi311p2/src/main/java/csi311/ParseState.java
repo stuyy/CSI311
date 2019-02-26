@@ -62,7 +62,8 @@ public class ParseState implements OrderParser {
 			for(State st : this.machineSpec.getMachineSpec())
 				this.startStates.add(st.getState().toLowerCase());
 			
-
+			this.setTerminalStates();
+			
 			this.setAllTransitions(orderFileDesc);
 			this.processOrders(orderFileDesc);
 		}
@@ -220,7 +221,7 @@ public class ParseState implements OrderParser {
     		return false;
     	else {
     		
-    		if(fields[3].equalsIgnoreCase("fulfilled") || fields[3].equalsIgnoreCase("cancelled"))
+    		if(this.terminalStates.contains(fields[3].toLowerCase()))
     			validFields[3] = true;
     		else
     			validFields[3] = this.isValidState(fields[3]);
@@ -386,13 +387,39 @@ public class ParseState implements OrderParser {
 				this.statusFromFiles.add(tokens[3].trim().toLowerCase());
 		}
 		
-		for(String st : this.statusFromFiles)
-			System.out.println(st);
 	}
 	
 	private void setTerminalStates()
 	{
 		// Loop through the states, check the transitions. If the transitions match any of the states, continue.
 		// If they don't, then the transition is a terminal state, add it to the list of terminal states.
+		for(State st : this.machineSpec.getMachineSpec())
+		{
+			if(st.getState().equalsIgnoreCase("start")) // Ignore Start State
+				continue;
+			
+			List<String> transitions = st.getTransitions();
+			for(String t : transitions)
+			{
+				if(this.isValidState(t))
+					continue;
+				else {
+					if(this.terminalStates.contains(t))
+						continue;
+					else
+						this.terminalStates.add(t);
+				}
+			}
+			
+		}
+	}
+	
+	private void printTerminalStates()
+	{
+		System.out.print("Terminal States: ");
+		for(String t : this.terminalStates)
+			System.out.print(t + " ");
+		
+		System.out.println();
 	}
 }
