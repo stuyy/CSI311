@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 public class Database {
 	
-	private final String dbConnectionURI = "jdbc:sqlite:ordersdb.db";
+	private final String dbConnectionURI = "jdbc:sqlite:orders.db";
 	private Connection connection;
 	private Statement statement;
 	private MachineSpec machineSpec;
@@ -30,6 +30,25 @@ public class Database {
 		}
 	}
 	
+	public Database()
+	{
+		try {
+			Class.forName("org.sqlite.JDBC");
+			this.connection = DriverManager.getConnection(this.dbConnectionURI);
+			System.out.println("Successfully connected to the database.");
+			this.cachedStates = new HashMap();
+		}
+		catch(Exception ex)
+		{
+			System.out.println(ex);
+		}
+	}
+	
+	public void setMachineSpec(MachineSpec machineSpec)
+	{
+		this.machineSpec = machineSpec;
+	}
+	
 	public MachineSpec getMachineSpec()
 	{
 		return this.machineSpec;
@@ -39,13 +58,12 @@ public class Database {
 	{
 		// Let's insert the tenantId first.
 		this.insertTenant(this.machineSpec.getTentantId());
+		System.out.println(this.machineSpec.getTentantId());
 		// Now that the tenant is inserted, we will insert the state machine into the db.
 		int value = this.insertStateMachine(this.machineSpec.getTentantId());
 		System.out.println("The state machine is: " + value);
 		// Now insert all of the States with the foreign key value.
 		this.insertStates(value);
-		
-		
 	}
 	// Insert into the tables.
 	
@@ -97,10 +115,6 @@ public class Database {
 	 */
 	public void createSchema()
 	{
-		this.executeStatement("DROP TABLE Tenants");
-		this.executeStatement("DROP TABLE StateMachine");
-		this.executeStatement("DROP TABLE State");
-		// We want to create some tables.
 		this.executeStatement("Create table IF NOT EXISTS Tenants (tenantId INTEGER NOT NULL PRIMARY KEY)");
 		this.executeStatement("Create table IF NOT EXISTS StateMachine " +
 				"(stateMachineTenantId INTEGER NOT NULL PRIMARY KEY, " +
@@ -112,17 +126,27 @@ public class Database {
 				"stateName VARCHAR(255) NOT NULL, "+
 				"transitions VARCHAR(500) NOT NULL, "
 				+ "FOREIGN KEY (stateMachineId) REFERENCES StateMachine(stateMachineId))");
-		
+	}
+	
+	public void dropSchema()
+	{
+		this.executeStatement("DROP TABLE Tenants");
+		this.executeStatement("DROP TABLE StateMachine");
+		this.executeStatement("DROP TABLE State");
 	}
 	
 	public void displayTenants()
 	{
+		
 		try {
+			this.statement = this.connection.createStatement();
 			ResultSet result = this.statement.executeQuery("SELECT * FROM Tenants");
 			ResultSetMetaData md = result.getMetaData();
 			
+			
 			for (int i = 1; i <= md.getColumnCount(); i++) {
                 //print Column Names
+				
                 System.out.print(md.getColumnLabel(i)+"\t\t");  
             }
 			System.out.println("\n-------------------------------------------------");
@@ -132,6 +156,7 @@ public class Database {
             }
 			result.close();
 			this.statement.close();
+			
 		}
 		catch(SQLException ex)
 		{
@@ -142,6 +167,7 @@ public class Database {
 	public void displayStateMachines()
 	{
 		try {
+			this.statement = this.connection.createStatement();
 			ResultSet result = this.statement.executeQuery("SELECT * FROM StateMachine");
 			ResultSetMetaData md = result.getMetaData();
 			
@@ -166,6 +192,7 @@ public class Database {
 	public void displayStates()
 	{
 		try {
+			this.statement = this.connection.createStatement();
 			ResultSet result = this.statement.executeQuery("SELECT * FROM State");
 			ResultSetMetaData md = result.getMetaData();
 			
