@@ -22,6 +22,7 @@ public class Driver {
 					MachineSpec machineSpec = FileProcessor.parseJson(jsonString);
 					Database db = new Database(machineSpec);
 					db.createSchema();
+					db.insert();
 					db.displayTenants();
 					db.displayStateMachines();
 					db.displayStates();

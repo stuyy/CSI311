@@ -23,7 +23,6 @@ public class Database {
 			System.out.println("Successfully connected to the database.");
 			this.machineSpec = machineSpec;
 			this.cachedStates = new HashMap();
-			this.insert();
 		}
 		catch(Exception ex)
 		{
@@ -92,9 +91,15 @@ public class Database {
     		this.executeStatement("INSERT INTO State (stateMachineId, stateName, transitions) VALUES(\'" +  stateMachineId + "\', \'" + stateName + "\', \'" + transitionSet +"\')");
 		}
 	}
+	/**
+	 *  Since we only need to make the tables once, this method will only be called on the --state argument. So we can delete the tables in the beginning.
+	 *  
+	 */
 	public void createSchema()
 	{
-		//this.executeStatement("DROP TABLE STATE");
+		this.executeStatement("DROP TABLE Tenants");
+		this.executeStatement("DROP TABLE StateMachine");
+		this.executeStatement("DROP TABLE State");
 		// We want to create some tables.
 		this.executeStatement("Create table IF NOT EXISTS Tenants (tenantId INTEGER NOT NULL PRIMARY KEY)");
 		this.executeStatement("Create table IF NOT EXISTS StateMachine " +
