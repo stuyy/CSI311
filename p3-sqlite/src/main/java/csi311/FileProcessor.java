@@ -45,7 +45,7 @@ public class FileProcessor {
     	}
     }
     
-    public static void processOrderFile(String filename) throws Exception {
+    public static void processOrderFile(String filename, Database db) throws Exception {
     	File file = new File(filename);
     	if(!file.exists())
     		throw new Exception("Error.");
@@ -57,7 +57,7 @@ public class FileProcessor {
     		while((line = reader.readLine()) != null)
     		{
     			System.out.println(line);
-    			
+ 
     		}
     	}
     }

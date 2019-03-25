@@ -19,17 +19,16 @@ public class Driver {
 				String mode = args[0];
 				String filePath = args[1];
 				
-
-				String jsonString = FileProcessor.processFile(filePath);
-				MachineSpec machineSpec = FileProcessor.parseJson(jsonString);
-				
 				if(mode.equalsIgnoreCase("--state")) // If the arg is state, store the machine in the database.
 				{
-					db = new Database(machineSpec);
+					String jsonString = FileProcessor.processFile(filePath);
+					MachineSpec machineSpec = FileProcessor.parseJson(jsonString);
+					db = new Database(machineSpec, jsonString);
 					db.dropSchema();
 					db.createSchema();
 					
 					db.insert();
+					db.executeStatement("INSERT INTO MachineSpec VALUES ('" + jsonString + "')");
 					db.displayStateMachines();
 					db.displayStates();
 					db.displayTenants();
@@ -38,7 +37,7 @@ public class Driver {
 				else if(mode.equalsIgnoreCase("--order"))
 				{
 					// Process Order
-					db = new Database(machineSpec);
+					db = new Database();
 					System.out.println("Processing orders.");
 					System.out.println();
 					db.displayTenants();
@@ -52,8 +51,12 @@ public class Driver {
 					// Instead of reading it from the Database, since we know the DB will store the most recent one, just take it from the machineSpec.
 					
 					int tenantID = db.getMachineSpec().getTentantId();
-					// Now what do we do next? --order flag should probably just store all the orders in the database tbh...
+					System.out.println("Hey" + tenantID);
 					
+					// Now what do we do next? --order flag should probably just store all the orders in the database tbh...
+					//FileProcessor.processOrderFile(filePath, db);
+					
+					// Insert every line into the Orders table in the database. We don't need to validate it right now.
 					
 				}
 				else if(mode.equalsIgnoreCase("--report"))

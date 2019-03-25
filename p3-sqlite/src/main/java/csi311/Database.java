@@ -15,7 +15,7 @@ public class Database {
 	private MachineSpec machineSpec;
 	private HashMap<String, List> cachedStates;
 	
-	public Database(MachineSpec machineSpec)
+	public Database(MachineSpec machineSpec, String json)
 	{
 		try {
 			Class.forName("org.sqlite.JDBC");
@@ -23,6 +23,7 @@ public class Database {
 			System.out.println("Successfully connected to the database.");
 			this.machineSpec = machineSpec;
 			this.cachedStates = new HashMap();
+			
 		}
 		catch(Exception ex)
 		{
@@ -37,18 +38,28 @@ public class Database {
 			this.connection = DriverManager.getConnection(this.dbConnectionURI);
 			System.out.println("Successfully connected to the database.");
 			this.cachedStates = new HashMap();
+			this.statement = this.connection.createStatement();
+			ResultSet result = statement.executeQuery("SELECT * FROM MachineSpec");
+			ResultSetMetaData md = result.getMetaData();
+			for (int i = 1; i <= md.getColumnCount(); i++) {
+                //print Column Names
+                System.out.print(md.getColumnLabel(i)+"\t\t");  
+            }
+			System.out.println("\n-------------------------------------------------");
+			while(result.next()) {
+				String str = result.getString(1);
+				System.out.println(str);
+				MachineSpec spec = FileProcessor.parseJson(str);
+				this.machineSpec = spec;
+            }
+			result.close();
+			this.statement.close();
 		}
 		catch(Exception ex)
 		{
 			System.out.println(ex);
 		}
 	}
-	
-	public void setMachineSpec(MachineSpec machineSpec)
-	{
-		this.machineSpec = machineSpec;
-	}
-	
 	public MachineSpec getMachineSpec()
 	{
 		return this.machineSpec;
@@ -126,6 +137,16 @@ public class Database {
 				"stateName VARCHAR(255) NOT NULL, "+
 				"transitions VARCHAR(500) NOT NULL, "
 				+ "FOREIGN KEY (stateMachineId) REFERENCES StateMachine(stateMachineId))");
+	
+		this.executeStatement("CREATE TABLE IF NOT EXISTS Orders (" +
+				"tenantID INTEGER NOT NULL, " +
+				"FOREIGN KEY (tenantID) REFERENCES Tenants(tenantId))"
+				);
+		
+		this.executeStatement("CREATE TABLE IF NOT EXISTS MachineSpec (" +
+				"machineSpec VARCHAR(9000) NOT NULL)"
+				);
+		
 	}
 	
 	public void dropSchema()
@@ -133,6 +154,7 @@ public class Database {
 		this.executeStatement("DROP TABLE Tenants");
 		this.executeStatement("DROP TABLE StateMachine");
 		this.executeStatement("DROP TABLE State");
+		this.executeStatement("DROP TABLE MachineSpec");
 	}
 	
 	public void displayTenants()
