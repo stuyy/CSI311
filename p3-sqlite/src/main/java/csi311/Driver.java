@@ -54,14 +54,19 @@ public class Driver {
 					System.out.println("Hey" + tenantID);
 					
 					// Now what do we do next? --order flag should probably just store all the orders in the database tbh...
-					//FileProcessor.processOrderFile(filePath, db);
+					FileProcessor.processOrderFile(filePath, db);
 					
 					// Insert every line into the Orders table in the database. We don't need to validate it right now.
+					
 					
 				}
 				else if(mode.equalsIgnoreCase("--report"))
 				{
 					// Process report.
+					
+					// Inside report flag, we will read the orders from the Database and validate.
+					db = new Database();
+					db.processReport();
 				}
 			}
 			
