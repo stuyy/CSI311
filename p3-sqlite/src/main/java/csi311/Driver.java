@@ -11,8 +11,52 @@ public class Driver {
 	public static void main(String [] args) throws Exception
 	{
 		
-		Database db;
+		Database db = new Database();
+		db.createSchema(); // Upon running the application, we first initialize the database by creating all of the necessary tables.
 		
+		// After initializing the database, we shall check to see which mode we are running our application in.
+		try {
+			if(args.length != 2)
+				throw new Exception("Invalid amount of arguments");
+			else {
+				String appMode = args[0]; // Store the mode
+				String file = args[1]; // Store the file path.
+				
+				if(appMode.equalsIgnoreCase("--state")) // If --state, load the state machine into the database table.
+				{
+					
+					String json = FileProcessor.processFile(file);
+					MachineSpec ms = FileProcessor.parseJson(json);
+					// Now insert the state machine into the database.
+					
+					if(db.tenantExists(ms.getTentantId())) // Check if the StateMachine already exists.
+					{
+						System.out.println("The Machine exists for tenant " + ms.getTentantId());
+					}
+					else {
+						db.insertStateMachine(ms);
+						db.executeStatement("INSERT INTO MachineSpec VALUES('" + json + "')");
+					}
+					
+					db.displayStateMachines();
+					db.displayStates();
+				}
+				else if(appMode.equalsIgnoreCase("--order"))
+				{
+					
+				}
+				else if(appMode.equalsIgnoreCase("--report"))
+				{
+					
+				}
+			}
+		}
+		catch(Exception ex)
+		{
+			
+		}
+		
+		/*
 		try {
 			if(args.length == 2)
 			{
@@ -23,8 +67,9 @@ public class Driver {
 				{
 					String jsonString = FileProcessor.processFile(filePath);
 					MachineSpec machineSpec = FileProcessor.parseJson(jsonString);
+					
 					db = new Database(machineSpec, jsonString);
-					db.dropSchema();
+					//db.dropSchema();
 					db.createSchema();
 					
 					db.insert();
@@ -77,7 +122,7 @@ public class Driver {
 		catch(Exception ex)
 		{
 			System.out.println(ex);
-		}
+		} */
 	}
 	
 	

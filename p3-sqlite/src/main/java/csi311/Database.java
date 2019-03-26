@@ -56,19 +56,36 @@ public class Database implements OrderParser {
 	
 	public Database()
 	{
+		
+		try {
+			Class.forName("org.sqlite.JDBC");
+			this.connection = DriverManager.getConnection(this.dbConnectionURI);
+			System.out.println("Success.");
+			
+			this.cachedStates = new HashMap<String, List>();
+		}
+		catch(Exception ex)
+		{
+			System.out.println(ex);
+		}
+		/*
 		try {
 			Class.forName("org.sqlite.JDBC");
 			this.connection = DriverManager.getConnection(this.dbConnectionURI);
 			System.out.println("Successfully connected to the database.");
+			
 			this.cachedStates = new HashMap();
 			this.statement = this.connection.createStatement();
+			
 			ResultSet result = statement.executeQuery("SELECT * FROM MachineSpec");
 			ResultSetMetaData md = result.getMetaData();
+			
 			while(result.next()) {
 				String str = result.getString(1);
 				MachineSpec spec = FileProcessor.parseJson(str);
 				this.machineSpec = spec;
             }
+			
 			result.close();
 			this.statement.close();
 			
@@ -95,13 +112,37 @@ public class Database implements OrderParser {
 		catch(Exception ex)
 		{
 			System.out.println(ex);
+		} */
+	}
+	
+	public boolean tenantExists(int tenantId)
+	{
+		try {
+			this.statement = this.connection.createStatement();
+			ResultSet result = this.statement.executeQuery("SELECT * FROM StateMachine WHERE stateMachineTenantId = " + tenantId);
+			if(result.next())
+				return true;
+			else {
+				return false;
+			}
 		}
+		catch(Exception ex)
+		{
+			System.out.println(ex);
+			return false;
+		}
+	}
+	public void insertStateMachine(MachineSpec ms)
+	{
+		this.insertTenant(ms.getTentantId()); // First insert the tenant.
+		int val = this.insertStateMachine(ms.getTentantId());
+		this.insertStates(val, ms);
 	}
 	public MachineSpec getMachineSpec()
 	{
 		return this.machineSpec;
 	}
-	
+	/*
 	public void insert()
 	{
 		// Let's insert the tenantId first.
@@ -112,7 +153,7 @@ public class Database implements OrderParser {
 		System.out.println("The state machine is: " + value);
 		// Now insert all of the States with the foreign key value.
 		this.insertStates(value);
-	}
+	}*/
 	// Insert into the tables.
 	
 	public void insertTenant(int id)
@@ -137,9 +178,9 @@ public class Database implements OrderParser {
 		}
 	}
 	
-	public void insertStates(int stateMachineId)
+	public void insertStates(int stateMachineId, MachineSpec ms)
 	{
-		List<State> states = this.machineSpec.getMachineSpec();
+		List<State> states = ms.getMachineSpec();
 		for(State s : states)
 		{
 			List<String> transitions = s.getTransitions();
@@ -354,14 +395,14 @@ public class Database implements OrderParser {
     	else
     		return false;
     }
-	
+	/*
 	public void dropSchema()
 	{
 		this.executeStatement("DROP TABLE Tenants");
 		this.executeStatement("DROP TABLE StateMachine");
 		this.executeStatement("DROP TABLE State");
 		this.executeStatement("DROP TABLE MachineSpec");
-	}
+	}*/
 	
 	public void displayTenants()
 	{
