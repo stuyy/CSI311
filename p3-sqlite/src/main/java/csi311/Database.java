@@ -21,98 +21,26 @@ public class Database implements OrderParser {
 	private HashMap<String, Order> orders;
 	private ArrayList<String> startStates;
 	private ArrayList<String> terminalStates;
-	
-	public Database(MachineSpec machineSpec, String json)
-	{
-		try {
-			Class.forName("org.sqlite.JDBC");
-			this.connection = DriverManager.getConnection(this.dbConnectionURI);
-			System.out.println("Successfully connected to the database.");
-			this.machineSpec = machineSpec;
-			this.cachedStates = new HashMap();
-			
-			this.terminalStates = new ArrayList<String>();
-			this.startStates = new ArrayList<String>();
-			this.orders = new HashMap<String, Order>();
-			this.invalidOrders = new ArrayList<String>();
-			
-			this.setTerminalStates();
-			
-			// Set the proper start states.
-			for(State st : this.machineSpec.getMachineSpec())
-			{
-				if(st.getState().equalsIgnoreCase("start"))
-				{
-					for(String s : st.getTransitions())
-						this.startStates.add(s);
-				}
-			}
-		}
-		catch(Exception ex)
-		{
-			System.out.println(ex);
-		}
-	}
-	
+	private HashMap<String, Integer> correctOrderCount;
 	public Database()
 	{
-		
+
+		this.cachedStates = new HashMap<String, List>();
+		this.terminalStates = new ArrayList<String>();
+		this.orders = new HashMap<String, Order>();
+		this.startStates = new ArrayList<String>();
+		this.invalidOrders = new ArrayList<String>();
+		this.correctOrderCount = new HashMap<String, Integer>();
 		try {
 			Class.forName("org.sqlite.JDBC");
 			this.connection = DriverManager.getConnection(this.dbConnectionURI);
 			System.out.println("Success.");
-			
-			this.cachedStates = new HashMap<String, List>();
 		}
 		catch(Exception ex)
 		{
 			System.out.println(ex);
 		}
-		/*
-		try {
-			Class.forName("org.sqlite.JDBC");
-			this.connection = DriverManager.getConnection(this.dbConnectionURI);
-			System.out.println("Successfully connected to the database.");
-			
-			this.cachedStates = new HashMap();
-			this.statement = this.connection.createStatement();
-			
-			ResultSet result = statement.executeQuery("SELECT * FROM MachineSpec");
-			ResultSetMetaData md = result.getMetaData();
-			
-			while(result.next()) {
-				String str = result.getString(1);
-				MachineSpec spec = FileProcessor.parseJson(str);
-				this.machineSpec = spec;
-            }
-			
-			result.close();
-			this.statement.close();
-			
-			this.terminalStates = new ArrayList<String>();
-			this.startStates = new ArrayList<String>();
-			this.orders = new HashMap<String, Order>();
-			this.invalidOrders = new ArrayList<String>();
-			
-			this.setTerminalStates();
-			
-			for(State st : this.machineSpec.getMachineSpec())
-			{
-				if(st.getState().equalsIgnoreCase("start"))
-				{
-					for(String s : st.getTransitions())
-						this.startStates.add(s);
-				}
-			}
-			
-
-	    	for(String c : this.startStates)
-	    		System.out.println(c);
-		}
-		catch(Exception ex)
-		{
-			System.out.println(ex);
-		} */			
+		
 	}
 	
 	public boolean tenantExists(int tenantId)
@@ -136,53 +64,17 @@ public class Database implements OrderParser {
 	{
 		this.insertTenant(ms.getTentantId()); // First insert the tenant.
 		this.executeStatement("INSERT INTO StateMachine VALUES(" + ms.getTentantId() + ", " + "'" + json + "'" + ")");
-		//this.insertStates(val, ms);
 	}
 	public MachineSpec getMachineSpec()
 	{
 		return this.machineSpec;
 	}
-	/*
-	public void insert()
-	{
-		// Let's insert the tenantId first.
-		this.insertTenant(this.machineSpec.getTentantId());
-		System.out.println(this.machineSpec.getTentantId());
-		// Now that the tenant is inserted, we will insert the state machine into the db.
-		int value = this.insertStateMachine(this.machineSpec.getTentantId());
-		System.out.println("The state machine is: " + value);
-		// Now insert all of the States with the foreign key value.
-		this.insertStates(value);
-	}*/
-	// Insert into the tables.
 	
 	public void insertTenant(int id)
 	{
 		this.executeStatement("INSERT INTO Tenants VALUES(" + id + ")");
 	}
 	
-	
-	
-	public void insertStates(int stateMachineId, MachineSpec ms)
-	{
-		List<State> states = ms.getMachineSpec();
-		for(State s : states)
-		{
-			List<String> transitions = s.getTransitions();
-			this.cachedStates.put(s.getState(), transitions);
-		}
-		
-		Iterator iter = this.cachedStates.entrySet().iterator();
-		while(iter.hasNext())
-		{
-			Map.Entry pair = (Map.Entry) iter.next();
-    		
-    		String stateName = pair.getKey().toString();
-    		String transitionSet = pair.getValue().toString().replaceAll("[\\[\\]]", "").trim();
-    		System.out.println(transitionSet);
-    		this.executeStatement("INSERT INTO State (stateMachineId, stateName, transitions) VALUES(\'" +  stateMachineId + "\', \'" + stateName + "\', \'" + transitionSet +"\')");
-		}
-	}
 	/**
 	 *  Since we only need to make the tables once, this method will only be called on the --state argument. So we can delete the tables in the beginning.
 	 *  
@@ -192,49 +84,51 @@ public class Database implements OrderParser {
 		this.executeStatement("Create table IF NOT EXISTS Tenants (tenantId INTEGER NOT NULL PRIMARY KEY)");
 		
 		this.executeStatement("CREATE TABLE IF NOT EXISTS StateMachine (stateMachineTenantId INTEGER NOT NULL PRIMARY KEY, machineSpec VARCHAR(10000) NOT NULL)");
-		/*
-		this.executeStatement("Create table IF NOT EXISTS StateMachine " +
-				"(stateMachineTenantId INTEGER NOT NULL PRIMARY KEY, " +
-				"FOREIGN KEY (stateMachineTenantId) REFERENCES State(stateMachineId))");
-	
-		this.executeStatement("CREATE TABLE IF NOT EXISTS State (" + 
-				"stateId INTEGER NOT NULL PRIMARY KEY, " +
-				"stateMachineId INTEGER NOT NULL, " +
-				"stateName VARCHAR(255) NOT NULL, "+
-				"transitions VARCHAR(500) NOT NULL, "
-				+ "FOREIGN KEY (stateMachineId) REFERENCES StateMachine(stateMachineId))");
-				
-		
-		this.executeStatement("CREATE TABLE IF NOT EXISTS MachineSpec (" +
-				"machineSpec VARCHAR(9000) NOT NULL)"
-				);
-		
-		*/
 		this.executeStatement("CREATE TABLE IF NOT EXISTS Orders (" +
 				"tenantID INTEGER NOT NULL, " +
 				"FOREIGN KEY (tenantID) REFERENCES Tenants(tenantId))"
 				);
 		
-		this.executeStatement("CREATE TABLE IF NOT EXISTS OrdersFromFile (OrderString VARCHAR(10000) NOT NULL)");
+		this.executeStatement("CREATE TABLE IF NOT EXISTS OrdersFromFile (orderTenantId INTEGER NOT NULL, OrderString VARCHAR(10000) NOT NULL, FOREIGN KEY (orderTenantId) REFERENCES StateMachine(stateMachineTenantId))");
 	}
 	
-	public void processReport()
+	public void setMachineSpec(int tenantId) 
 	{
-		// Inside this method we will read each line from OrdersFromFile table and then validate it.
-		
 		try {
 			this.statement = this.connection.createStatement();
-			ResultSet result = this.statement.executeQuery("SELECT * FROM OrdersFromFile");
+			ResultSet result = this.statement.executeQuery("SELECT * FROM StateMachine WHERE stateMachineTenantId = " + tenantId);
+			
+			String curr = result.getString(2);
+			this.machineSpec = FileProcessor.parseJson(curr);
+		}
+		catch(Exception ex)
+		{
+			System.out.println(ex);
+		}
+	}
+	public void processReport(int tenantId)
+	{
+		
+		try {
+			this.setMachineSpec(tenantId);
+			
+			this.setTerminalStates();
+			this.setStartStates();
+			
+			this.statement = this.connection.createStatement();
+			ResultSet result = this.statement.executeQuery("SELECT * FROM OrdersFromFile WHERE orderTenantId = " + tenantId);
 			ResultSetMetaData md = result.getMetaData();
 			
-			
 			while(result.next()) {
-				String curr = result.getString(1);
+				
+				String curr = result.getString(2);
 				String line = "";
 		    	String [] tokens;
 		    	tokens = curr.split(",");
+		    	
 		    	this.trimWhitespace(tokens);
 		    	this.validateFields(tokens);
+		    	
 		    	boolean status = this.validateFields(tokens);
 		    	
 		    	if(status)	
@@ -242,9 +136,7 @@ public class Database implements OrderParser {
 		    		// Inside here, we will first check if the HashMap contains the OrderID as a Key.
 		    		// First we should check the invalid orders, if the order id is in the invalid order list, then it cannot be deemed as valid.
 		    		if(this.invalidOrders.contains(tokens[2]))
-		    		{
 		    			continue;
-		    		}
 		    		
 		    		if(this.orders.containsKey(tokens[2]))
 		    		{
@@ -300,10 +192,41 @@ public class Database implements OrderParser {
 		finally {
 			for(String i : this.invalidOrders)
 				System.out.println(i);
+			
+			this.generateReport();
 		}
 		
 	}
 	
+	private void generateReport()
+    {
+    	// Print the invalid orders first.
+    	
+    	Iterator iter = this.orders.entrySet().iterator();
+    	while(iter.hasNext())
+    	{
+    		Map.Entry pair = (Map.Entry) iter.next();
+    		String key = (String) pair.getKey();
+    		Order order = this.orders.get(key);
+    		if(this.correctOrderCount.containsKey(order.getState()))
+    		{
+    			int newValue = this.correctOrderCount.get(order.getState());
+    			this.correctOrderCount.put(order.getState(), ++newValue);
+    		}
+    		else {
+    			this.correctOrderCount.put(order.getState(), 1);
+    		}
+    	}
+    	
+    	iter = this.correctOrderCount.entrySet().iterator();
+    	while(iter.hasNext())
+    	{
+    		Map.Entry pair = (Map.Entry) iter.next();
+    		System.out.println(pair.getKey() + ": " + pair.getValue());
+    	}
+    	System.out.println("flagged: " + this.invalidOrders.size());
+    		
+    }
 	
 	private boolean isValidTransition(String currentState, String nextState)
     {
@@ -347,7 +270,8 @@ public class Database implements OrderParser {
     			validFields[4] = true;
     		else
     			validFields[4] = this.isValidState(fields[4]);
-    		
+
+
     		validFields[0] = this.isValidTenantId(Integer.parseInt(fields[0]));
     		validFields[1] = this.isValidTimestamp(fields[1]);
     		validFields[2] = this.isValidOrderID(fields[2]);
@@ -363,6 +287,7 @@ public class Database implements OrderParser {
     		}
     		else {	
     			// Check if the state that was validated is a start state.
+    			
     			if(this.isValidStartState(fields[4]))
     			{
     				validFields[4] = true;
@@ -555,6 +480,19 @@ public class Database implements OrderParser {
 		return this.machineSpec.getTentantId() == tenantId;
 	}
 	
+	private void setStartStates()
+	{
+
+		for(State st : this.machineSpec.getMachineSpec())
+		{
+			if(st.getState().equalsIgnoreCase("start"))
+			{
+				for(String s : st.getTransitions())
+					this.startStates.add(s);
+			}
+		}
+		
+	}
 	private void setTerminalStates()
 	{
 		// Loop through the states, check the transitions. If the transitions match any of the states, continue.

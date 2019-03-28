@@ -47,20 +47,21 @@ public class FileProcessor {
     
     public static void processOrderFile(String filename, Database db) throws Exception {
     	File file = new File(filename);
+    	System.out.println("PRocessing file: " + filename);
     	if(!file.exists())
     		throw new Exception("Error.");
     	else {
     		System.out.println("File exists.");
     		BufferedReader reader = new BufferedReader(new FileReader(file));
     		String line;
+    		int tenantId;
     		while((line = reader.readLine()) != null)
     		{
     			System.out.println(line);
-    			db.executeStatement("INSERT INTO OrdersFromFile VALUES('" + line + "')");
+    			tenantId = Integer.parseInt(line.split(",")[0]);
+    			db.executeStatement("INSERT INTO OrdersFromFile VALUES(" + tenantId + ", '" + line + "')");
     		}
     	}
     }
-    
-    
     
 }
