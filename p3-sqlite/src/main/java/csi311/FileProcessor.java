@@ -53,7 +53,6 @@ public class FileProcessor {
     		System.out.println("File exists.");
     		BufferedReader reader = new BufferedReader(new FileReader(file));
     		String line;
-    		db.executeStatement("DELETE FROM OrdersFromFile");
     		while((line = reader.readLine()) != null)
     		{
     			System.out.println(line);

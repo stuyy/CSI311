@@ -112,7 +112,7 @@ public class Database implements OrderParser {
 		catch(Exception ex)
 		{
 			System.out.println(ex);
-		} */
+		} */			
 	}
 	
 	public boolean tenantExists(int tenantId)
@@ -132,11 +132,11 @@ public class Database implements OrderParser {
 			return false;
 		}
 	}
-	public void insertStateMachine(MachineSpec ms)
+	public void insertStateMachine(MachineSpec ms, String json)
 	{
 		this.insertTenant(ms.getTentantId()); // First insert the tenant.
-		int val = this.insertStateMachine(ms.getTentantId());
-		this.insertStates(val, ms);
+		this.executeStatement("INSERT INTO StateMachine VALUES(" + ms.getTentantId() + ", " + "'" + json + "'" + ")");
+		//this.insertStates(val, ms);
 	}
 	public MachineSpec getMachineSpec()
 	{
@@ -161,22 +161,7 @@ public class Database implements OrderParser {
 		this.executeStatement("INSERT INTO Tenants VALUES(" + id + ")");
 	}
 	
-	public int insertStateMachine(int tenantId)
-	{
-		this.executeStatement("INSERT INTO StateMachine (stateMachineTenantId) VALUES (" + tenantId + ")");
-		try {
-			ResultSet result = this.statement.executeQuery("SELECT * FROM StateMachine WHERE stateMachineTenantId = " + tenantId);
-			ResultSetMetaData md = result.getMetaData();
-			int stateMachineId = result.getInt(1);
-			result.close();
-			return stateMachineId;
-		}
-		catch(SQLException ex)
-		{
-			System.out.println(ex);
-			return -1;
-		}
-	}
+	
 	
 	public void insertStates(int stateMachineId, MachineSpec ms)
 	{
@@ -205,26 +190,30 @@ public class Database implements OrderParser {
 	public void createSchema()
 	{
 		this.executeStatement("Create table IF NOT EXISTS Tenants (tenantId INTEGER NOT NULL PRIMARY KEY)");
+		
+		this.executeStatement("CREATE TABLE IF NOT EXISTS StateMachine (stateMachineTenantId INTEGER NOT NULL PRIMARY KEY, machineSpec VARCHAR(10000) NOT NULL)");
+		/*
 		this.executeStatement("Create table IF NOT EXISTS StateMachine " +
 				"(stateMachineTenantId INTEGER NOT NULL PRIMARY KEY, " +
 				"FOREIGN KEY (stateMachineTenantId) REFERENCES State(stateMachineId))");
-		
+	
 		this.executeStatement("CREATE TABLE IF NOT EXISTS State (" + 
 				"stateId INTEGER NOT NULL PRIMARY KEY, " +
 				"stateMachineId INTEGER NOT NULL, " +
 				"stateName VARCHAR(255) NOT NULL, "+
 				"transitions VARCHAR(500) NOT NULL, "
 				+ "FOREIGN KEY (stateMachineId) REFERENCES StateMachine(stateMachineId))");
-	
-		this.executeStatement("CREATE TABLE IF NOT EXISTS Orders (" +
-				"tenantID INTEGER NOT NULL, " +
-				"FOREIGN KEY (tenantID) REFERENCES Tenants(tenantId))"
-				);
+				
 		
 		this.executeStatement("CREATE TABLE IF NOT EXISTS MachineSpec (" +
 				"machineSpec VARCHAR(9000) NOT NULL)"
 				);
 		
+		*/
+		this.executeStatement("CREATE TABLE IF NOT EXISTS Orders (" +
+				"tenantID INTEGER NOT NULL, " +
+				"FOREIGN KEY (tenantID) REFERENCES Tenants(tenantId))"
+				);
 		
 		this.executeStatement("CREATE TABLE IF NOT EXISTS OrdersFromFile (OrderString VARCHAR(10000) NOT NULL)");
 	}
@@ -248,7 +237,7 @@ public class Database implements OrderParser {
 		    	this.validateFields(tokens);
 		    	boolean status = this.validateFields(tokens);
 		    	
-		    	if(status)
+		    	if(status)	
 		    	{
 		    		// Inside here, we will first check if the HashMap contains the OrderID as a Key.
 		    		// First we should check the invalid orders, if the order id is in the invalid order list, then it cannot be deemed as valid.
@@ -447,7 +436,8 @@ public class Database implements OrderParser {
 			System.out.println("\n-------------------------------------------------");
 			while(result.next()) {
 				int stateMachineId = result.getInt(1);
-				System.out.println(stateMachineId);
+				String msString = result.getString(2);
+				System.out.println(stateMachineId + "\t\t\t\t" + msString);
             }
 			result.close();
 			this.statement.close();

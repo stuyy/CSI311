@@ -62,6 +62,8 @@ public class ParseState implements OrderParser {
 			for(State st : this.machineSpec.getMachineSpec())
 				this.startStates.add(st.getState().toLowerCase());
 			
+			for(String c : this.startStates)
+				System.out.println(c);
 			this.setTerminalStates();
 			
 			this.setAllTransitions(orderFileDesc);
@@ -254,8 +256,12 @@ public class ParseState implements OrderParser {
     
     private boolean isValidStartState(String state)
     {
+    	
     	if(this.startStates.contains(state.toLowerCase()))
+    	{
+    		System.out.println(state + " is in the list!");
     		return true;
+    	}
     	else
     		return false;
     }
